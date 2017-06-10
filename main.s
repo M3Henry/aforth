@@ -60,17 +60,6 @@ stack:	.skip	64	#1048576
 	.set	WP,	%r12
 	.set	ACC,	%r11
 
-one:		codeword
-	mov	TOS,	(SP)
-	add	$8,	SP
-	mov	$1,	TOS
-	jmp	next
-
-
-double:		codeword
-	shl	TOS
-	jmp	next
-
 .macro	_dup
 	add	$8,	SP
 	mov	TOS,	(SP)
@@ -164,11 +153,20 @@ at:		codeword
 	mov	(TOS),	TOS
 	jmp	next
 
-
 bang:		codeword
 	mov	(SP),	ACC
 	mov	ACC,	(TOS)
 	jmp	_drop2
+
+one:		codeword
+	_dup
+	mov	$1,	TOS
+	jmp	next
+
+
+double:		codeword
+	shl	TOS
+	jmp	next
 
 plus:		codeword
 	add	TOS,	(SP)
