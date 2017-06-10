@@ -1,7 +1,17 @@
 	.data
 
-dict:
+cold:	.8byte	enter
+_cold:	.8byte	abort
+
+abort:	.8byte	enter
+	.8byte	quit
+
+quit:	.8byte	enter
 	.8byte	star
+	.8byte	doloop
+	.8byte	16
+
+dict:	.8byte	star
 	.8byte	star
 	.8byte	cr
 	.8byte	star
@@ -82,11 +92,21 @@ exit:	.8byte	. + 8
 	pop	IP
 	jmp	next
 
+docon:	.8byte	. + 8
+	mov	TOS,	(SP)
+	add	$8,	SP
+	mov	(IP),	TOS
+	add	$8,	IP
+	jmp	next
 
+doloop:	.8byte	. + 8
+	sub	(IP),	IP
+	jmp	next
 
-_start:
-	mov	$stack,	SP
-	mov	$dict,	IP
+	.text
+
+_start:	mov	$stack,	SP
+	mov	$_cold,	IP
 next:
 	mov	(IP),	WP
 	add	$8,	IP
@@ -101,10 +121,3 @@ enter:
 execute:	# not done!
 	mov	TOS,	WP
 	jmp	_drop
-
-docon:	.8byte	. + 8
-	mov	TOS,	(SP)
-	add	$8,	SP
-	mov	(IP),	TOS
-	add	$8,	IP
-	jmp	next
