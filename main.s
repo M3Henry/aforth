@@ -1,32 +1,50 @@
+.macro	const val
+	.quad	docon
+	.quad	\val
+.endm
 	.data
 
-cold:	.8byte	enter
-_cold:	.8byte	abort
+cold:	.quad	enter
+_cold:	.quad	abort
 
-abort:	.8byte	enter
-	.8byte	quit
+abort:	.quad	enter
+	.quad	quit
 
-quit:	.8byte	enter
-	.8byte	star
-	.8byte	doloop
-	.8byte	16
+quit:	.quad	enter
+	const 4
+linelp:		const	10
+	starlp:		.quad	star
+			.quad	dec
+			.quad	dup
+		.quad	dowhile
+		.quad	. - starlp
+		.quad	drop
+		.quad	cr
+		.quad	dec
+		.quad	dup
+	.quad	dowhile
+	.quad	. - linelp
+	.quad	halt
 
-dict:	.8byte	star
-	.8byte	star
-	.8byte	cr
-	.8byte	star
-	.8byte	star
-	.8byte	halt
+dict:	.quad	star
+	.quad	star
+	.quad	cr
+	.quad	star
+	.quad	star
+	.quad	halt
 
-star:	.8byte	enter
-	.8byte	docon
-	.8byte	42
-	.8byte	emit
-	.8byte	exit
+star:	.quad	enter
+	const	42
+	.quad	emit
+	.quad	exit
 
-buff:	.8byte
+buff:	.quad
 
-stack:	.skip	1048576
+stack:	.skip	64	#1048576
+
+.macro	advanceIP
+	add	$8,	IP
+.endm
 
 	.global _start
 
@@ -36,29 +54,39 @@ stack:	.skip	1048576
 	.set	SP,	%r14
 	.set	IP,	%r13
 	.set	WP,	%r12
+	.set	ACC,	%r11
 
-one:	.8byte	. + 8
+one:		.quad	. + 8
 	mov	TOS,	(SP)
 	add	$8,	SP
 	mov	$1,	TOS
 	jmp	next
 
 
-double:	.8byte	. + 8
+double:		.quad	. + 8
 	shl	TOS
 	jmp	next
 
-dup:	.8byte	. + 8
-	mov	TOS,	(SP)
+.macro	_dup
 	add	$8,	SP
+	mov	TOS,	(SP)
+.endm
+dup:		.quad	. + 8
+	_dup
 	jmp	next
 
-drop:	.8byte	. + 8
+drop2:		.quad	. + 8
+_drop2:	sub	$8,	SP
+	mov	(SP),	TOS
+	sub	$8,	SP
+	jmp	next
+
+drop:		.quad	. + 8
 _drop:	mov	(SP),	TOS
 	sub	$8,	SP
 	jmp	next
 
-emit:	.8byte	. + 8
+emit:		.quad	. + 8
 	movq	TOS,	buff
 	mov     $1,	%rax	# system call 1 is write
         mov     $1,	%rdi	# file handle 1 is stdout
@@ -67,7 +95,7 @@ emit:	.8byte	. + 8
         syscall
 	jmp	_drop
 
-cr:	.8byte	. + 8
+cr:		.quad	. + 8
 	call	_cr
 	jmp	next
 newl:	.ascii	"\n\r"
@@ -79,7 +107,7 @@ _cr:
         syscall
 	ret
 
-halt:	.8byte . + 8
+halt:		.quad . + 8
 	call	_cr
 	xor     %rdi,	%rdi	# default return code 0
 	sub	$stack, SP
@@ -88,20 +116,61 @@ halt:	.8byte . + 8
 _halt:	mov     $60,	%rax	# system call 60 is exit
 	syscall
 
-exit:	.8byte	. + 8
+exit:		.quad	. + 8
 	pop	IP
 	jmp	next
 
-docon:	.8byte	. + 8
-	mov	TOS,	(SP)
-	add	$8,	SP
+docon:		.quad	. + 8
+	_dup
 	mov	(IP),	TOS
-	add	$8,	IP
+	advanceIP
 	jmp	next
 
-doloop:	.8byte	. + 8
+doagain:	.quad	. + 8
 	sub	(IP),	IP
 	jmp	next
+
+dowhile:	.quad	. + 8
+	cmp	$0,	TOS
+	je	__whe
+	sub	(IP),	IP
+	jmp	_drop
+__whe:	advanceIP
+	jmp	_drop
+
+execute:	.quad . + 8
+	mov	TOS,	IP
+	add	$8,	IP
+	jmp	_drop
+
+at:		.quad . + 8
+	mov	(TOS),	TOS
+	jmp	next
+
+
+bang:		.quad . + 8
+	mov	(SP),	ACC
+	mov	ACC,	(TOS)
+	jmp	_drop2
+
+plus:		.quad . + 8
+	add	TOS,	(SP)
+	jmp	_drop
+
+minus:		.quad . + 8
+	sub	TOS,	(SP)
+	jmp	_drop
+
+inc:		.quad . + 8
+	inc	TOS
+	jmp	next
+
+dec:		.quad . + 8
+	sub	$1,	TOS
+	jmp	next
+
+
+
 
 	.text
 
@@ -109,15 +178,11 @@ _start:	mov	$stack,	SP
 	mov	$_cold,	IP
 next:
 	mov	(IP),	WP
-	add	$8,	IP
+	advanceIP
 	jmp	*(WP)
 
 enter:
 	push	IP
 	mov	WP,	IP
-	add	$8,	IP
+	advanceIP
 	jmp	next
-
-execute:	# not done!
-	mov	TOS,	WP
-	jmp	_drop
