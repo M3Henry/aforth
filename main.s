@@ -42,6 +42,10 @@ buff:	.quad
 
 stack:	.skip	64	#1048576
 
+.macro	codeword
+	.quad	. + 8
+.endm
+
 .macro	advanceIP
 	add	$8,	IP
 .endm
@@ -56,14 +60,14 @@ stack:	.skip	64	#1048576
 	.set	WP,	%r12
 	.set	ACC,	%r11
 
-one:		.quad	. + 8
+one:		codeword
 	mov	TOS,	(SP)
 	add	$8,	SP
 	mov	$1,	TOS
 	jmp	next
 
 
-double:		.quad	. + 8
+double:		codeword
 	shl	TOS
 	jmp	next
 
@@ -71,22 +75,22 @@ double:		.quad	. + 8
 	add	$8,	SP
 	mov	TOS,	(SP)
 .endm
-dup:		.quad	. + 8
+dup:		codeword
 	_dup
 	jmp	next
 
-drop2:		.quad	. + 8
+drop2:		codeword
 _drop2:	sub	$8,	SP
 	mov	(SP),	TOS
 	sub	$8,	SP
 	jmp	next
 
-drop:		.quad	. + 8
+drop:		codeword
 _drop:	mov	(SP),	TOS
 	sub	$8,	SP
 	jmp	next
 
-emit:		.quad	. + 8
+emit:		codeword
 	movq	TOS,	buff
 	mov     $1,	%rax	# system call 1 is write
         mov     $1,	%rdi	# file handle 1 is stdout
@@ -95,19 +99,19 @@ emit:		.quad	. + 8
         syscall
 	jmp	_drop
 
-cr:		.quad	. + 8
+cr:		codeword
 	call	_cr
 	jmp	next
 newl:	.ascii	"\n\r"
 _cr:
-	mov     $1,	%rax	# system call 1 is write
-        mov     $1,	%rdi	# file handle 1 is stdout
-        mov     $newl,	%rsi	# address of string to output
-        mov     $2,	%rdx	# number of bytes
+	mov     $1,	%rax
+        mov     $1,	%rdi
+        mov     $newl,	%rsi
+        mov     $2,	%rdx
         syscall
 	ret
 
-halt:		.quad . + 8
+halt:		codeword
 	call	_cr
 	xor     %rdi,	%rdi	# default return code 0
 	sub	$stack, SP
@@ -116,57 +120,70 @@ halt:		.quad . + 8
 _halt:	mov     $60,	%rax	# system call 60 is exit
 	syscall
 
-exit:		.quad	. + 8
+exit:		codeword
 	pop	IP
 	jmp	next
 
-docon:		.quad	. + 8
+docon:		codeword
 	_dup
 	mov	(IP),	TOS
 	advanceIP
 	jmp	next
 
-doagain:	.quad	. + 8
+dovar:		codeword
+	_dup
+	mov	(IP),	TOS
+	mov	(TOS),	TOS
+	advanceIP
+	jmp	next
+
+doagain:	codeword
 	sub	(IP),	IP
 	jmp	next
 
-dowhile:	.quad	. + 8
+dowhile:	codeword
 	cmp	$0,	TOS
-	je	__whe
+	je	__brk
 	sub	(IP),	IP
 	jmp	_drop
-__whe:	advanceIP
+__brk:	advanceIP
 	jmp	_drop
 
-execute:	.quad . + 8
+dountil:	codeword
+	cmp	$0,	TOS
+	jne	__brk
+	sub	(IP),	IP
+	jmp	_drop
+
+execute:	codeword
 	mov	TOS,	IP
 	add	$8,	IP
 	jmp	_drop
 
-at:		.quad . + 8
+at:		codeword
 	mov	(TOS),	TOS
 	jmp	next
 
 
-bang:		.quad . + 8
+bang:		codeword
 	mov	(SP),	ACC
 	mov	ACC,	(TOS)
 	jmp	_drop2
 
-plus:		.quad . + 8
+plus:		codeword
 	add	TOS,	(SP)
 	jmp	_drop
 
-minus:		.quad . + 8
+minus:		codeword
 	sub	TOS,	(SP)
 	jmp	_drop
 
-inc:		.quad . + 8
+inc:		codeword
 	inc	TOS
 	jmp	next
 
-dec:		.quad . + 8
-	sub	$1,	TOS
+dec:		codeword
+	dec	TOS
 	jmp	next
 
 
