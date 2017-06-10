@@ -1,0 +1,3 @@
+#! /bin/bash
+
+gcc -c main.s && ld main.o && ./a.out
