@@ -30,29 +30,19 @@ abort:	forthword
 	.quad	quit
 
 quit:	forthword
+	const	10
 	const	4
 	.quad	flag
 	.quad	halt
-linelp:		const	10
-	starlp2:		.quad	star
-			.quad	dec
-			.quad	dup
-		.quad	dowhile
-		.quad	. - starlp2
-		.quad	drop
-		.quad	cr
-		.quad	dec
-		.quad	dup
-	.quad	dowhile
-	.quad	. - linelp
-	.quad	halt
 
 flag:	forthword
-	flaglp:	const 10
+	flaglp:	.quad	over
 		.quad	line
 		.quad	dec
 		.quad	dup
 	while	flaglp
+	.quad	drop
+	.quad	drop
 	endword
 
 line:	forthword
@@ -108,6 +98,18 @@ _drop2:	sub	$8,	SP
 drop:		codeword
 _drop:	mov	(SP),	TOS
 	sub	$8,	SP
+	jmp	next
+
+swap:		codeword
+	push	TOS
+	mov	(SP),	TOS
+	pop	(SP)
+	jmp	next
+
+over:		codeword
+	push	(SP)
+	_dup
+	pop	TOS
 	jmp	next
 
 emit:		codeword
