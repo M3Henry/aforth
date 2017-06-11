@@ -1,16 +1,30 @@
+.macro	forthword
+	.quad	enter
+.endm
+
+.macro	endword
+	.quad	exit
+.endm
+
 .macro	const val
 	.quad	docon
 	.quad	\val
 .endm
+
+.macro	vari label
+	.quad	dovar
+	.quad	\label
+.endm
+
 	.data
 
-cold:	.quad	enter
+cold:	forthword
 _cold:	.quad	abort
 
-abort:	.quad	enter
+abort:	forthword
 	.quad	quit
 
-quit:	.quad	enter
+quit:	forthword
 	const 4
 linelp:		const	10
 	starlp:		.quad	star
@@ -26,17 +40,10 @@ linelp:		const	10
 	.quad	. - linelp
 	.quad	halt
 
-dict:	.quad	star
-	.quad	star
-	.quad	cr
-	.quad	star
-	.quad	star
-	.quad	halt
-
-star:	.quad	enter
+star:	forthword
 	const	42
 	.quad	emit
-	.quad	exit
+	endword
 
 buff:	.quad
 
