@@ -16,6 +16,11 @@
 	.quad	\label
 .endm
 
+.macro	while label
+	.quad	dowhile
+	.quad	. - \label
+.endm
+
 	.data
 
 cold:	forthword
@@ -25,13 +30,15 @@ abort:	forthword
 	.quad	quit
 
 quit:	forthword
-	const 4
+	const	4
+	.quad	flag
+	.quad	halt
 linelp:		const	10
-	starlp:		.quad	star
+	starlp2:		.quad	star
 			.quad	dec
 			.quad	dup
 		.quad	dowhile
-		.quad	. - starlp
+		.quad	. - starlp2
 		.quad	drop
 		.quad	cr
 		.quad	dec
@@ -40,6 +47,23 @@ linelp:		const	10
 	.quad	. - linelp
 	.quad	halt
 
+flag:	forthword
+	flaglp:	const 10
+		.quad	line
+		.quad	dec
+		.quad	dup
+	while	flaglp
+	endword
+
+line:	forthword
+	starlp:	.quad	star
+		.quad	dec
+		.quad	dup
+	while	starlp
+	.quad	drop
+	.quad	cr
+	endword
+
 star:	forthword
 	const	42
 	.quad	emit
@@ -47,7 +71,7 @@ star:	forthword
 
 buff:	.quad
 
-stack:	.skip	64	#1048576
+stack:	.skip	1024	#1048576
 
 .macro	codeword
 	.quad	. + 8
