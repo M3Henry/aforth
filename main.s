@@ -88,10 +88,10 @@ _drop:	mov	(SP),	TOS
 
 emit:		codeword
 	movq	TOS,	buff
-	mov     $1,	%rax	# system call 1 is write
-        mov     $1,	%rdi	# file handle 1 is stdout
-        mov     $buff,	%rsi	# address of string to output
-        mov     $1,	%rdx	# number of bytes
+	mov	$1,	%rax	# system call 1 is write
+        mov	$1,	%rdi	# file handle 1 is stdout
+        mov	$buff,	%rsi	# address of string to output
+        mov	$1,	%rdx	# number of bytes
         syscall
 	jmp	_drop
 
@@ -100,10 +100,10 @@ cr:		codeword
 	jmp	next
 newl:	.ascii	"\n\r"
 _cr:
-	mov     $1,	%rax
-        mov     $1,	%rdi
-        mov     $newl,	%rsi
-        mov     $2,	%rdx
+	mov	$1,	%rax
+        mov	$1,	%rdi
+        mov	$newl,	%rsi
+        mov	$2,	%rdx
         syscall
 	ret
 
