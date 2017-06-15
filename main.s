@@ -213,6 +213,11 @@ bangb:		codeword
 	movb	ACCB,	(TOS)
 	jmp	_drop2
 
+top:		codeword
+	_dup
+	mov	SP,	TOS
+	jmp	next
+
 #	Logic
 
 true:		codeword
