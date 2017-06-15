@@ -11,9 +11,9 @@
 	.quad	\val
 .endm
 
-.macro	vari label
-	.quad	dovar
-	.quad	\label
+.macro	string length
+	.quad	dostr
+	.quad	\length
 .endm
 
 .macro	while label
@@ -33,6 +33,11 @@ quit:	forthword
 	const	10
 	const	4
 	.quad	flag
+	.quad	cr
+	string	13
+	.ascii	"Hello, World!"
+	.quad	print
+	.quad	cr
 	.quad	halt
 
 flag:	forthword
@@ -59,6 +64,12 @@ star:	forthword
 	.quad	emit
 	endword
 
+cr:	forthword
+	string 2
+	.ascii	"\n\r"
+	.quad	print
+	endword
+
 buff:	.quad
 
 stack:	.skip	1024	#1048576
@@ -76,10 +87,14 @@ stack:	.skip	1024	#1048576
 	.text
 
 	.set	TOS,	%r15
+	.set	TOSB,	%r15b
 	.set	SP,	%r14
 	.set	IP,	%r13
 	.set	WP,	%r12
 	.set	ACC,	%r11
+	.set	ACCB,	%r11b
+
+#	Stack manipulation
 
 .macro	_dup
 	add	$8,	SP
@@ -112,6 +127,8 @@ over:		codeword
 	pop	TOS
 	jmp	next
 
+#	Output
+
 emit:		codeword
 	movq	TOS,	buff
 	mov	$1,	%rax	# system call 1 is write
@@ -121,20 +138,16 @@ emit:		codeword
         syscall
 	jmp	_drop
 
-cr:		codeword
-	call	_cr
-	jmp	next
-newl:	.ascii	"\n\r"
-_cr:
+print:		codeword
 	mov	$1,	%rax
         mov	$1,	%rdi
-        mov	$newl,	%rsi
-        mov	$2,	%rdx
-        syscall
-	ret
+        mov	(TOS),	%rdx
+	add	$8,	TOS
+        mov	TOS,	%rsi
+	syscall
+	jmp	_drop
 
 halt:		codeword
-	call	_cr
 	xor     %rdi,	%rdi	# default return code 0
 	sub	$stack, SP
 	jz	_halt
@@ -142,9 +155,7 @@ halt:		codeword
 _halt:	mov     $60,	%rax	# system call 60 is exit
 	syscall
 
-exit:		codeword
-	pop	IP
-	jmp	next
+#	Do Stuff
 
 docon:		codeword
 	_dup
@@ -152,10 +163,10 @@ docon:		codeword
 	advanceIP
 	jmp	next
 
-dovar:		codeword
+dostr:		codeword
 	_dup
-	mov	(IP),	TOS
-	mov	(TOS),	TOS
+	mov	IP,	TOS
+	add	(IP),	IP
 	advanceIP
 	jmp	next
 
@@ -179,11 +190,17 @@ dountil:	codeword
 
 execute:	codeword
 	mov	TOS,	IP
-	add	$8,	IP
+	advanceIP
 	jmp	_drop
+
+#	Memory management
 
 at:		codeword
 	mov	(TOS),	TOS
+	jmp	next
+
+atb:		codeword
+	movb	(TOS),	TOSB
 	jmp	next
 
 bang:		codeword
@@ -191,15 +208,48 @@ bang:		codeword
 	mov	ACC,	(TOS)
 	jmp	_drop2
 
-one:		codeword
+bangb:		codeword
+	mov	(SP),	ACC
+	movb	ACCB,	(TOS)
+	jmp	_drop2
+
+#	Logic
+
+true:		codeword
 	_dup
-	mov	$1,	TOS
+	mov	$-1,	TOS
 	jmp	next
 
+false:		codeword
+	_dup
+	xor	TOS,	TOS
+	jmp	next
 
-double:		codeword
+lshift:		codeword
 	shl	TOS
 	jmp	next
+
+rshift:		codeword
+	shr	TOS
+	jmp	next
+
+not:		codeword
+	not	TOS
+	jmp	next
+
+and:		codeword
+	and	TOS,	(SP)
+	jmp	_drop
+
+or:		codeword
+	or	TOS,	(SP)
+	jmp	_drop
+
+xor:		codeword
+	xor	TOS,	(SP)
+	jmp	_drop
+
+#	Maths
 
 plus:		codeword
 	add	TOS,	(SP)
@@ -217,8 +267,11 @@ dec:		codeword
 	dec	TOS
 	jmp	next
 
+#	Kernel
 
-
+exit:		codeword
+	pop	IP
+	jmp	next
 
 	.text
 
