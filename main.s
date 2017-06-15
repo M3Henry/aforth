@@ -11,10 +11,11 @@
 	.quad	\val
 .endm
 
-.macro	string length data
+.macro	string data
 	.quad	dostr
-	.quad	\length
-	.ascii	"\data\()"
+	.quad	2f - 1f
+1:	.ascii	"\data\()"
+2:
 .endm
 
 .macro	while label
@@ -35,7 +36,7 @@ quit:	forthword
 	const	4
 	.quad	flag
 	.quad	cr
-	string	13	"Hello, World!"
+	string	"Hello, World!"
 	.quad	print
 	.quad	cr
 	.quad	halt
@@ -65,7 +66,7 @@ star:	forthword
 	endword
 
 cr:	forthword
-	string	2	"\n\r"
+	string	"\n\r"
 	.quad	print
 	endword
 
