@@ -284,6 +284,7 @@ accept:		codeword
 	mov	(SP),	ARGB
 	mov	TOS,	ARGC
 	mov	CMD,	(SP)
+	syscall
 	jmp	_drop
 
 #	Do Stuff
