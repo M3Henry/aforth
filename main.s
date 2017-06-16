@@ -77,16 +77,14 @@ dottest:	forthword
 
 inputtest:	forthword
 	do	tib
-	debug
 		do	dup
 		do	dup
 		do	load
 		do	swap
 		const	8
 		do	plus
-		debug
 		do	swap
-		debug
+		do	dotdot
 		do	accept
 #		do	drop
 		do	dot
@@ -127,7 +125,7 @@ star:		forthword
 
 tib:		forthword
 #	scratch	80
-	string	"_______________________________________________________________"
+	string	"________________________________________________________________________________"
 	endword
 
 cr:		forthword
@@ -154,6 +152,26 @@ _dot:		forthword
 		do	plus
 		do	emit
 	endword
+
+dotdot:		forthword
+	string	"..."
+	do	print
+	do	_dotdot
+	do	cr
+	endword
+
+_dotdot:	forthword
+	do	top
+	test	equal	stack	1f
+		do	drop
+		do	pushret
+		do	_dotdot
+		do	popret
+		const	'\t'
+		do	emit
+		do	dup
+		do	dot
+1:	endword
 
 buff:	.quad
 
@@ -187,6 +205,10 @@ stack:	.skip	1024	#1048576
 	.set	ARGA,	%rdi
 	.set	ARGB,	%rsi
 	.set	ARGC,	%rdx
+	.set	ARGD,	%r10
+	.set	ARGE,	%r8
+	.set	ARGF,	%r9
+
 
 #	Stack manipulation
 
@@ -313,13 +335,14 @@ bangb:		codeword
 	jmp	_drop2
 
 top:		codeword
+	push	SP
 	_dup
-	mov	SP,	TOS
+	pop	TOS
 	jmp	next
 
 pushret:	codeword
 	push	TOS
-	jmp	drop
+	jmp	_drop
 
 popret:		codeword
 	_dup
