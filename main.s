@@ -22,6 +22,12 @@
 2:
 .endm
 
+.macro	scratch length
+	do	dostr
+	.quad	\length
+	.skip	\length
+.endm
+
 .macro	if label
 	do	dobranch
 	.quad	\label
@@ -54,11 +60,32 @@ quit:		forthword
 	const	greet
 	do	execute
 	do	dottest
+#	do	inputtest
 	do	halt
 
 dottest:	forthword
 	const	-1234090
 	do	dot
+	do	cr
+	endword
+
+inputtest:	forthword
+	do	tib
+#	do	dup
+	do	dup
+	do	load
+	do	swap
+	const	8
+	do	plus
+	do	swap
+#	do	dot
+#	do	cr
+#	do	dot
+	do	accept
+	do	drop
+#	do	drop
+#	do	drop
+#	do	print
 	do	cr
 	endword
 
@@ -90,6 +117,10 @@ line:		forthword
 star:		forthword
 	const	'*'
 	do	emit
+	endword
+
+tib:		forthword
+	scratch	80
 	endword
 
 cr:		forthword
@@ -125,8 +156,12 @@ stack:	.skip	1024	#1048576
 	.quad	. + 8
 .endm
 
-.macro	advanceIP
-	add	$8,	IP
+.macro	advance	register
+	add	$8,	\register
+.endm
+
+.macro	retreat	register
+	sub	$8,	\register
 .endm
 
 	.global _start
@@ -141,10 +176,12 @@ stack:	.skip	1024	#1048576
 	.set	ACC,	%r11
 	.set	ACCB,	%r11b
 
+	.set	CMD,	%rax
+
 #	Stack manipulation
 
 .macro	_dup
-	add	$8,	SP
+	advance	SP
 	mov	TOS,	(SP)
 .endm
 dup:		codeword
@@ -152,14 +189,14 @@ dup:		codeword
 	jmp	next
 
 drop2:		codeword
-_drop2:	sub	$8,	SP
+_drop2:	retreat	SP
 	mov	(SP),	TOS
-	sub	$8,	SP
+	retreat	SP
 	jmp	next
 
 drop:		codeword
 _drop:	mov	(SP),	TOS
-	sub	$8,	SP
+	retreat	SP
 	jmp	next
 
 swap:		codeword
@@ -178,7 +215,7 @@ over:		codeword
 
 emit:		codeword
 	movq	TOS,	buff
-	mov	$1,	%rax	# system call 1 is write
+	mov	$1,	CMD	# system call 1 is write
         mov	$1,	%rdi	# file handle 1 is stdout
         mov	$buff,	%rsi	# address of string to output
         mov	$1,	%rdx	# number of bytes
@@ -186,10 +223,10 @@ emit:		codeword
 	jmp	_drop
 
 print:		codeword
-	mov	$1,	%rax
+	mov	$1,	CMD
         mov	$1,	%rdi
         mov	(TOS),	%rdx
-	add	$8,	TOS
+	advance	TOS
         mov	TOS,	%rsi
 	syscall
 	jmp	_drop
@@ -199,22 +236,31 @@ halt:		codeword
 	sub	$stack, SP
 	jz	_halt
 		mov	TOS,	%rdi
-_halt:	mov     $60,	%rax	# system call 60 is exit
+_halt:	mov     $60,	CMD	# system call 60 is exit
 	syscall
 
+#	Input
+
+accept:		codeword
+	mov	0,	CMD
+	mov	$0,	%rdi
+	mov	(SP),	%rsi
+	mov	TOS,	%rdx
+	mov	CMD,	(SP)
+	jmp	_drop
 #	Do Stuff
 
 docon:		codeword
 	_dup
 	mov	(IP),	TOS
-	advanceIP
+	advance	IP
 	jmp	next
 
 dostr:		codeword
 	_dup
 	mov	IP,	TOS
 	add	(IP),	IP
-	advanceIP
+	advance	IP
 	jmp	next
 
 dojump:		codeword
@@ -226,7 +272,7 @@ dobranch:	codeword
 	je	__brk
 	mov	(IP),	IP
 	jmp	_drop
-__brk:	advanceIP
+__brk:	advance	IP
 	jmp	_drop
 
 dountil:	codeword
@@ -237,7 +283,7 @@ dountil:	codeword
 
 #	Memory management
 
-at:		codeword
+load:		codeword
 	mov	(TOS),	TOS
 	jmp	next
 
@@ -245,7 +291,7 @@ atb:		codeword
 	movb	(TOS),	TOSB
 	jmp	next
 
-bang:		codeword
+store:		codeword
 	mov	(SP),	ACC
 	mov	ACC,	(TOS)
 	jmp	_drop2
@@ -370,8 +416,8 @@ exit:		codeword
 execute:	codeword
 	mov	TOS,	WP
 	mov	(SP),	TOS
-	sub	$8,	SP
-	jmp	next2
+	retreat	SP
+	jmp	*(WP)
 
 	.text
 
@@ -379,11 +425,11 @@ _start:	mov	$stack,	SP
 	mov	$_cold,	IP
 next:
 	mov	(IP),	WP
-next2:	advanceIP
+	advance	IP
 	jmp	*(WP)
 
 enter:
 	push	IP
 	mov	WP,	IP
-	advanceIP
+	advance	IP
 	jmp	next
