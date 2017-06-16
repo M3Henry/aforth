@@ -67,6 +67,7 @@ quit:		forthword
 	do	execute
 	do	dottest
 	do	inputtest
+	do	dotdot
 	do	halt
 
 dottest:	forthword
@@ -86,8 +87,11 @@ inputtest:	forthword
 		do	swap
 		do	dotdot
 		do	accept
-#		do	drop
+		string	"Read "
+		do	print
 		do	dot
+		string	" characters."
+		do	print
 		do	cr
 	do	print
 	do	cr
@@ -162,8 +166,9 @@ dotdot:		forthword
 
 _dotdot:	forthword
 	do	top
-	test	equal	stack	1f
-		do	drop
+	const	stack
+	do	equal
+	if	1f
 		do	pushret
 		do	_dotdot
 		do	popret
