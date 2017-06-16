@@ -35,18 +35,21 @@ quit:		forthword
 	const	10
 	const	4
 	.quad	flag
-	.quad	cr
-	string	"Hello, World!"
-	.quad	print
-	.quad	cr
+	.quad	greet
+	.quad	dottest
+	.quad	halt
+
+dottest:	forthword
 	const	-8
 	.quad	dot
 	.quad	cr
-	const	-10
-	.quad	negate
-	const	10
-	.quad	equal
-	.quad	halt
+	endword
+
+greet:		forthword
+	string	"Hello, World!"
+	.quad	print
+	.quad	cr
+	endword
 
 flag:		forthword
 	flaglp:	.quad	over
