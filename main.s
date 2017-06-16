@@ -18,20 +18,20 @@
 2:
 .endm
 
-.macro	while label
-	.quad	dowhile
-	.quad	. - \label
+.macro	if label
+	.quad	dobranch
+	.quad	\label
 .endm
 
 	.data
 
-cold:	forthword
+cold:		forthword
 _cold:	.quad	abort
 
-abort:	forthword
+abort:		forthword
 	.quad	quit
 
-quit:	forthword
+quit:		forthword
 	const	10
 	const	4
 	.quad	flag
@@ -39,39 +39,55 @@ quit:	forthword
 	string	"Hello, World!"
 	.quad	print
 	.quad	cr
+	const	-8
+	.quad	dot
+	.quad	cr
 	const	-10
 	.quad	negate
 	const	10
 	.quad	equal
 	.quad	halt
 
-flag:	forthword
+flag:		forthword
 	flaglp:	.quad	over
 		.quad	line
 		.quad	dec
 		.quad	dup
-	while	flaglp
+	if	flaglp
 	.quad	drop
 	.quad	drop
 	endword
 
-line:	forthword
+line:		forthword
 	starlp:	.quad	star
 		.quad	dec
 		.quad	dup
-	while	starlp
+	if	starlp
 	.quad	drop
 	.quad	cr
 	endword
 
-star:	forthword
-	const	42
+star:		forthword
+	const	'*'
 	.quad	emit
 	endword
 
-cr:	forthword
+cr:		forthword
 	string	"\n\r"
 	.quad	print
+	endword
+
+dot:		forthword
+	.quad	dup
+	const	0
+	.quad	gequal
+	if	dotif
+	const	'-'
+	.quad	emit
+	.quad	negate
+dotif:	const	'0'
+	.quad	plus
+	.quad	emit
 	endword
 
 buff:	.quad
@@ -174,14 +190,14 @@ dostr:		codeword
 	advanceIP
 	jmp	next
 
-doagain:	codeword
-	sub	(IP),	IP
+dojump:		codeword
+	mov	(IP),	IP
 	jmp	next
 
-dowhile:	codeword
+dobranch:	codeword
 	cmp	$0,	TOS
 	je	__brk
-	sub	(IP),	IP
+	mov	(IP),	IP
 	jmp	_drop
 __brk:	advanceIP
 	jmp	_drop
