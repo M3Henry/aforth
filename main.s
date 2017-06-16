@@ -328,6 +328,10 @@ greater:	compare	jg
 less:		compare jl
 gequal:		compare	jge
 lequal:		compare	jle
+above:		compare	ja
+below:		compare jb
+aequal:		compare	jae
+bequal:		compare	jbe
 
 #	Kernel
 
