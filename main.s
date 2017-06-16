@@ -184,6 +184,9 @@ stack:	.skip	1024	#1048576
 	.set	ACCB,	%r11b
 
 	.set	CMD,	%rax
+	.set	ARGA,	%rdi
+	.set	ARGB,	%rsi
+	.set	ARGC,	%rdx
 
 #	Stack manipulation
 
@@ -223,26 +226,26 @@ over:		codeword
 emit:		codeword
 	movq	TOS,	buff
 	mov	$1,	CMD	# system call 1 is write
-        mov	$1,	%rdi	# file handle 1 is stdout
-        mov	$buff,	%rsi	# address of string to output
-        mov	$1,	%rdx	# number of bytes
+        mov	$1,	ARGA	# file handle 1 is stdout
+        mov	$buff,	ARGB	# address of string to output
+        mov	$1,	ARGC	# number of bytes
         syscall
 	jmp	_drop
 
 print:		codeword
 	mov	$1,	CMD
-        mov	$1,	%rdi
-        mov	(TOS),	%rdx
+        mov	$1,	ARGA
+        mov	(TOS),	ARGC
 	advance	TOS
-        mov	TOS,	%rsi
+        mov	TOS,	ARGB
 	syscall
 	jmp	_drop
 
 halt:		codeword
-	xor     %rdi,	%rdi	# default return code 0
+	xor     ARGA,	ARGA	# default return code 0
 	sub	$stack, SP
 	jz	_halt
-		mov	TOS,	%rdi
+		mov	TOS,	ARGA
 _halt:	mov     $60,	CMD	# system call 60 is exit
 	syscall
 
@@ -250,9 +253,9 @@ _halt:	mov     $60,	CMD	# system call 60 is exit
 
 accept:		codeword
 	mov	$0,	CMD
-	mov	$0,	%rdi
-	mov	(SP),	%rsi
-	mov	TOS,	%rdx
+	mov	$0,	ARGA
+	mov	(SP),	ARGB
+	mov	TOS,	ARGC
 	mov	CMD,	(SP)
 	jmp	_drop
 
