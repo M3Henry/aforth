@@ -1,96 +1,105 @@
+.macro	do label
+	.quad	\label
+.endm
+
 .macro	forthword
-	.quad	enter
+	do	enter
 .endm
 
 .macro	endword
-	.quad	exit
+	do	exit
 .endm
 
 .macro	const val
-	.quad	docon
+	do	docon
 	.quad	\val
 .endm
 
 .macro	string data
-	.quad	dostr
+	do	dostr
 	.quad	2f - 1f
 1:	.ascii	"\data\()"
 2:
 .endm
 
 .macro	if label
-	.quad	dobranch
+	do	dobranch
 	.quad	\label
+.endm
+
+.macro	unless label
+	do	not
+	if	\label
 .endm
 
 	.data
 
 cold:		forthword
-_cold:	.quad	abort
+_cold:	do	abort
 
 abort:		forthword
-	.quad	quit
+	do	quit
 
 quit:		forthword
 	const	10
 	const	4
-	.quad	flag
-	.quad	greet
-	.quad	dottest
-	.quad	halt
+	do	flag
+	do	greet
+	do	dottest
+	do	halt
 
 dottest:	forthword
 	const	-8
-	.quad	dot
-	.quad	cr
+	do	dot
+	do	cr
 	endword
 
 greet:		forthword
 	string	"Hello, World!"
-	.quad	print
-	.quad	cr
+	do	print
+	do	cr
 	endword
 
 flag:		forthword
-	flaglp:	.quad	over
-		.quad	line
-		.quad	dec
-		.quad	dup
+	flaglp:	do	over
+		do	line
+		do	dec
+		do	dup
 	if	flaglp
-	.quad	drop
-	.quad	drop
+	do	drop
+	do	drop
 	endword
 
 line:		forthword
-	starlp:	.quad	star
-		.quad	dec
-		.quad	dup
+	starlp:	do	star
+		do	dec
+		do	dup
 	if	starlp
-	.quad	drop
-	.quad	cr
+	do	drop
+	do	cr
 	endword
 
 star:		forthword
 	const	'*'
-	.quad	emit
+	do	emit
 	endword
 
 cr:		forthword
 	string	"\n\r"
-	.quad	print
+	do	print
 	endword
 
 dot:		forthword
-	.quad	dup
+	do	dup
 	const	0
-	.quad	gequal
+	do	gequal
 	if	dotif
 	const	'-'
-	.quad	emit
-	.quad	negate
+	do	emit
+	do	negate
 dotif:	const	'0'
-	.quad	plus
-	.quad	emit
+	do	plus
+	do	emit
 	endword
 
 buff:	.quad
