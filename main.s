@@ -39,6 +39,10 @@ quit:	forthword
 	string	"Hello, World!"
 	.quad	print
 	.quad	cr
+	const	-10
+	.quad	negate
+	const	10
+	.quad	equal
 	.quad	halt
 
 flag:	forthword
@@ -222,7 +226,7 @@ top:		codeword
 
 true:		codeword
 	_dup
-	mov	$-1,	TOS
+	movq	$-1,	TOS
 	jmp	next
 
 false:		codeword
@@ -271,6 +275,31 @@ inc:		codeword
 dec:		codeword
 	dec	TOS
 	jmp	next
+
+negate:		codeword
+	neg	TOS
+	jmp	next
+
+#	Comparison
+
+.macro	compare	op
+		codeword
+	cmp	TOS,	(SP)
+	\op	truecmp
+	movq	$0,	(SP)
+	jmp	_drop
+.endm
+
+truecmp:
+	movq	$-1,	(SP)
+	jmp	_drop
+
+equal:		compare je
+nequal:		compare	jne
+greater:	compare	jg
+less:		compare jl
+gequal:		compare	jge
+lequal:		compare	jle
 
 #	Kernel
 
