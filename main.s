@@ -51,7 +51,8 @@ quit:		forthword
 	const	10
 	const	4
 	do	flag
-	do	greet
+	const	greet
+	do	execute
 	do	dottest
 	do	halt
 
@@ -234,11 +235,6 @@ dountil:	codeword
 	sub	(IP),	IP
 	jmp	_drop
 
-execute:	codeword
-	mov	TOS,	IP
-	advanceIP
-	jmp	_drop
-
 #	Memory management
 
 at:		codeword
@@ -371,13 +367,19 @@ exit:		codeword
 	pop	IP
 	jmp	next
 
+execute:	codeword
+	mov	TOS,	WP
+	mov	(SP),	TOS
+	sub	$8,	SP
+	jmp	next2
+
 	.text
 
 _start:	mov	$stack,	SP
 	mov	$_cold,	IP
 next:
 	mov	(IP),	WP
-	advanceIP
+next2:	advanceIP
 	jmp	*(WP)
 
 enter:
