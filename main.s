@@ -27,6 +27,13 @@
 	.quad	\label
 .endm
 
+.macro	test compare:req value:req target:req
+	do	dup
+	const	\value
+	do	\compare
+	if	\target
+.endm
+
 .macro	unless label
 	do	not
 	if	\label
@@ -49,7 +56,7 @@ quit:		forthword
 	do	halt
 
 dottest:	forthword
-	const	-8
+	const	-1234090
 	do	dot
 	do	cr
 	endword
@@ -61,20 +68,20 @@ greet:		forthword
 	endword
 
 flag:		forthword
-	flaglp:	do	over
+	1:	do	over
 		do	line
 		do	dec
 		do	dup
-	if	flaglp
+		if	1b
 	do	drop
 	do	drop
 	endword
 
 line:		forthword
-	starlp:	do	star
+	1:	do	star
 		do	dec
 		do	dup
-	if	starlp
+		if	1b
 	do	drop
 	do	cr
 	endword
@@ -90,16 +97,23 @@ cr:		forthword
 	endword
 
 dot:		forthword
-	do	dup
-	const	0
-	do	gequal
-	if	dotif
+	test	gequal	0	1f
 	const	'-'
 	do	emit
 	do	negate
-dotif:	const	'0'
-	do	plus
-	do	emit
+1:	do	_dot
+	endword
+
+_dot:		forthword
+	test	less	10	1f
+		const	10
+		do	divide
+		do	swap
+		do	_dot
+1:
+		const	'0'
+		do	plus
+		do	emit
 	endword
 
 buff:	.quad
@@ -250,6 +264,15 @@ top:		codeword
 	mov	SP,	TOS
 	jmp	next
 
+pushret:	codeword
+	push	TOS
+	jmp	drop
+
+popret:		codeword
+	_dup
+	pop	TOS
+	jmp	next
+
 #	Logic
 
 true:		codeword
@@ -306,6 +329,15 @@ dec:		codeword
 
 negate:		codeword
 	neg	TOS
+	jmp	next
+
+multiply:	codeword
+divide:		codeword
+	xor	%rdx,	%rdx
+	mov	(SP),	%rax
+	div	TOS
+	mov	%rax,	(SP)
+	mov	%rdx,	TOS
 	jmp	next
 
 #	Comparison
