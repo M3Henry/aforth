@@ -45,6 +45,12 @@
 	if	\label
 .endm
 
+.macro	debug
+	do	dup
+	do	dot
+	do	cr
+.endm
+
 	.data
 
 cold:		forthword
@@ -60,7 +66,7 @@ quit:		forthword
 	const	greet
 	do	execute
 	do	dottest
-#	do	inputtest
+	do	inputtest
 	do	halt
 
 dottest:	forthword
@@ -71,21 +77,21 @@ dottest:	forthword
 
 inputtest:	forthword
 	do	tib
-#	do	dup
-	do	dup
-	do	load
-	do	swap
-	const	8
-	do	plus
-	do	swap
-#	do	dot
-#	do	cr
-#	do	dot
-	do	accept
-	do	drop
-#	do	drop
-#	do	drop
-#	do	print
+	debug
+		do	dup
+		do	dup
+		do	load
+		do	swap
+		const	8
+		do	plus
+		debug
+		do	swap
+		debug
+		do	accept
+#		do	drop
+		do	dot
+		do	cr
+	do	print
 	do	cr
 	endword
 
@@ -120,7 +126,8 @@ star:		forthword
 	endword
 
 tib:		forthword
-	scratch	80
+#	scratch	80
+	string	"_______________________________________________________________"
 	endword
 
 cr:		forthword
@@ -242,12 +249,13 @@ _halt:	mov     $60,	CMD	# system call 60 is exit
 #	Input
 
 accept:		codeword
-	mov	0,	CMD
+	mov	$0,	CMD
 	mov	$0,	%rdi
 	mov	(SP),	%rsi
 	mov	TOS,	%rdx
 	mov	CMD,	(SP)
 	jmp	_drop
+
 #	Do Stuff
 
 docon:		codeword
