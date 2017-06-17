@@ -1,4 +1,4 @@
-*.o
-*.out
+bin/*
+obj/*
 *.swp
 *.save
