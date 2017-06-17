@@ -181,10 +181,14 @@ _dot:		forthword
 	endword
 
 dotdot:		forthword
-	string	"..."
-	do	print
-	do	_dotdot
-	do	cr
+	say	"..."
+	do	top
+	const	stack
+	do	nequal
+	if	1f
+		say	"Stack Empty"
+1:	do	_dotdot
+	saycr	"..."
 	endword
 
 _dotdot:	forthword
