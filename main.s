@@ -205,6 +205,27 @@ _dotdot:	forthword
 		do	dot
 1:	endword
 
+dup2:		forthword
+	do	over
+	do	over
+	endword
+
+min:		forthword
+	do	dup2
+	do	less
+	if	1f
+		do	swap
+1:	do	drop
+	endword
+
+max:		forthword
+	do	dup2
+	do	greater
+	if	1f
+		do	swap
+1:	do	drop
+	endword
+
 buff:	.quad
 
 stack:	.skip	1024	#1048576
