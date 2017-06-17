@@ -267,6 +267,13 @@ print:		codeword
         mov	TOS,	ARGB
 	syscall
 	jmp	_drop
+type:		codeword
+	mov	$1,	CMD
+	mov	$1,	ARGA
+	mov	(SP),	ARGB
+	mov	TOS,	ARGC
+	syscall
+	jmp	_drop2
 
 halt:		codeword
 	xor     ARGA,	ARGA	# default return code 0
