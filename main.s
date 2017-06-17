@@ -74,7 +74,7 @@
 	.data
 
 cold:		forthword
-_cold:	saycr	"aFORTH alpha"
+_cold:	saycr	"aFORTH alpha \xe2\x9c\x93"
 	const	0
 	do	numtib
 	do	store
