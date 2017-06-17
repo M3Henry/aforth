@@ -1,4 +1,4 @@
 #! /bin/bash
 
-gcc -c main.s && ld main.o && rm main.o && ./a.out
+gcc -c main.s && ld main.o && rm main.o && echo "Testing, 123..." | ./a.out
 echo "Returns:" $?

@@ -15,17 +15,37 @@
 	.quad	\val
 .endm
 
-.macro	string data
+.macro	variable
+	do	dovar
+	.quad	0
+.endm
+
+.macro	string msg
 	do	dostr
 	.quad	2f - 1f
-1:	.ascii	"\data\()"
+1:	.ascii	"\msg\()"
 2:
 .endm
 
+.macro	say msg
+	string	"\msg\()"
+	do	print
+.endm
+
+.macro	saycr msg
+	say	"\msg\()\n"
+.endm
+
 .macro	scratch length
-	do	dostr
-	.quad	\length
-	.skip	\length
+	const	1f
+	goto	2f
+1:	.skip	\length
+2:
+.endm
+
+.macro	goto label
+	do	dogoto
+	.quad	\label
 .endm
 
 .macro	if label
@@ -54,7 +74,11 @@
 	.data
 
 cold:		forthword
-_cold:	do	abort
+_cold:	saycr	"aFORTH alpha"
+	const	0
+	do	numtib
+	do	store
+	do	abort
 
 abort:		forthword
 	do	quit
@@ -68,6 +92,7 @@ quit:		forthword
 	do	dottest
 	do	inputtest
 	do	dotdot
+	saycr	"Done."
 	do	halt
 
 dottest:	forthword
@@ -78,28 +103,23 @@ dottest:	forthword
 
 inputtest:	forthword
 	do	tib
-		do	dup
-		do	dup
-		do	load
-		do	swap
-		const	8
-		do	plus
-		do	swap
-		do	dotdot
-		do	accept
-		string	"Read "
-		do	print
-		do	dot
-		string	" characters."
-		do	print
-		do	cr
-	do	print
+	do	dup
+	const	80
+	say	"Enter something: >"
+	do	accept
 	do	cr
+	say	"Read "
+	do	dup
+	do	dot
+	saycr	" characters."
+
+	say	"["
+	do	type
+	saycr	"]"
 	endword
 
 greet:		forthword
-	string	"Hello, World!"
-	do	print
+	say	"Hello, World!"
 	do	cr
 	endword
 
@@ -128,13 +148,16 @@ star:		forthword
 	endword
 
 tib:		forthword
-#	scratch	80
-	string	"________________________________________________________________________________"
+	scratch	80
+	endword
+
+numtib:		forthword
+	variable
 	endword
 
 cr:		forthword
-	string	"\n\r"
-	do	print
+	const	'\n'
+	do	emit
 	endword
 
 dot:		forthword
@@ -181,6 +204,8 @@ _dotdot:	forthword
 buff:	.quad
 
 stack:	.skip	1024	#1048576
+
+#	Codeword macros
 
 .macro	codeword
 	.quad	. + 8
@@ -290,8 +315,8 @@ accept:		codeword
 	mov	$0,	ARGA
 	mov	(SP),	ARGB
 	mov	TOS,	ARGC
-	mov	CMD,	(SP)
 	syscall
+	mov	CMD,	(SP)
 	jmp	_drop
 
 #	Do Stuff
@@ -302,6 +327,12 @@ docon:		codeword
 	advance	IP
 	jmp	next
 
+dovar:		codeword
+	_dup
+	mov	IP,	TOS
+	advance	IP
+	jmp	next
+
 dostr:		codeword
 	_dup
 	mov	IP,	TOS
@@ -309,7 +340,7 @@ dostr:		codeword
 	advance	IP
 	jmp	next
 
-dojump:		codeword
+dogoto:		codeword
 	mov	(IP),	IP
 	jmp	next
 
