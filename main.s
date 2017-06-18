@@ -169,8 +169,7 @@ getword:	forthword
 		do	inc
 		goto	1b
 2:	do	drop
-
-3:
+3:	do	drop
 	do	pad
 	endword
 
