@@ -82,6 +82,12 @@
 	do	cr
 .endm
 
+.macro	offset var distance
+	do	\var
+	const	\distance
+	do	plus
+.endm
+
 	.data
 
 cold:		forthword
@@ -102,6 +108,8 @@ quit:		forthword
 	do	inputtest
 	set	numin	0
 	1:	do	getword
+		do	print
+		do	cr
 		get	numin
 		get	numtib
 		do	less
@@ -137,6 +145,9 @@ inputtest:	forthword
 	endword
 
 getword:	forthword
+	set	pad	0
+	offset	pad	8
+
 1:	get	numin
 	get	numtib
 	do	gequal
@@ -151,10 +162,16 @@ getword:	forthword
 	const	' '
 	do	equal
 	if	2f
-		do	emit
+		do	pad
+		do	incaddr
+		do	over
+		do	storeb
+		do	inc
 		goto	1b
 2:	do	drop
-3:	do	cr
+
+3:
+	do	pad
 	endword
 
 greet:		forthword
@@ -232,9 +249,9 @@ dotdot:		forthword
 	do	top
 	const	stack
 	do	nequal
-	if	1f
+	if	3f
 		say	"Stack Empty"
-1:	do	_dotdot
+3:	do	_dotdot
 	saycr	"..."
 	endword
 
@@ -446,7 +463,7 @@ store:		codeword
 	mov	ACC,	(TOS)
 	jmp	_drop2
 
-bangb:		codeword
+storeb:		codeword
 	mov	(SP),	ACC
 	movb	ACCB,	(TOS)
 	jmp	_drop2
