@@ -20,6 +20,17 @@
 	.quad	0
 .endm
 
+.macro	get var
+	do	\var
+	do	fetch
+.endm
+
+.macro	set var value
+	const	\value
+	do	\var
+	do	store
+.endm
+
 .macro	string msg
 	do	dostr
 	.quad	2f - 1f
@@ -75,9 +86,7 @@
 
 cold:		forthword
 _cold:	saycr	"aFORTH alpha \xe2\x9c\x93"
-	const	0
-	do	numtib
-	do	store
+	set	numtib	0
 	do	abort
 
 abort:		forthword
@@ -91,6 +100,12 @@ quit:		forthword
 	do	execute
 	do	dottest
 	do	inputtest
+	set	numin	0
+	1:	do	getword
+		get	numin
+		get	numtib
+		do	less
+		if	1b
 	do	dotdot
 	saycr	"Done."
 	do	halt
@@ -107,6 +122,9 @@ inputtest:	forthword
 	const	80
 	say	"Enter something: >"
 	do	accept
+	do	dup
+	do	numtib
+	do	store
 	do	cr
 	say	"Read "
 	do	dup
@@ -116,6 +134,27 @@ inputtest:	forthword
 	say	"["
 	do	type
 	saycr	"]"
+	endword
+
+getword:	forthword
+1:	get	numin
+	get	numtib
+	do	gequal
+	if	3f
+	do	tib
+	get	numin
+	do	plus
+	do	fetchb
+	do	numin
+	do	incaddr
+	do	dup
+	const	' '
+	do	equal
+	if	2f
+		do	emit
+		goto	1b
+2:	do	drop
+3:	do	cr
 	endword
 
 greet:		forthword
@@ -147,11 +186,19 @@ star:		forthword
 	do	emit
 	endword
 
+pad:		forthword
+	scratch	90
+	endword
+
 tib:		forthword
 	scratch	80
 	endword
 
 numtib:		forthword
+	variable
+	endword
+
+numin:		forthword
 	variable
 	endword
 
@@ -385,12 +432,13 @@ dountil:	codeword
 
 #	Memory management
 
-load:		codeword
+fetch:		codeword
 	mov	(TOS),	TOS
 	jmp	next
 
-atb:		codeword
+fetchb:		codeword
 	movb	(TOS),	TOSB
+	and	$0xFF,	TOS
 	jmp	next
 
 store:		codeword
@@ -471,6 +519,14 @@ inc:		codeword
 dec:		codeword
 	dec	TOS
 	jmp	next
+
+incaddr:	codeword
+	incq	(TOS)
+	jmp	_drop
+
+decaddr:	codeword
+	decq	(TOS)
+	jmp	_drop
 
 negate:		codeword
 	neg	TOS

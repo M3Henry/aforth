@@ -1,6 +1,6 @@
 all: bin/aFORTH
 	@echo Testing...
-	@/bin/echo -ne "Testing, 123! \xe2\x9c\x93" | bin/aFORTH
+	@/bin/echo -ne "WORD PHRASE WORD BOX" | bin/aFORTH
 
 bin/aFORTH: obj/main.o
 	@echo Linking...
