@@ -264,9 +264,9 @@ _dotdot:	forthword
 	const	stack
 	do	equal
 	if	1f
-		do	pushret
-		do	_dotdot
-		do	popret
+		do	pushret			# Top of stack
+		do	_dotdot			#
+		do	popret			#
 		const	'\t'
 		do	emit
 		do	dup
@@ -328,20 +328,20 @@ quadcmp:	forthword
 		do	drop
 		do	true
 		endword
-1:	do	pushret
-	do	dup2
-	do	indneq
-	if	0f
-		do	inc
-		do	swap
-		do	inc
-		do	swap
-		do	popret
+1:	do	pushret				# Count
+	do	dup2				#
+	do	indneq				#
+	if	0f				#
+		do	inc			#
+		do	swap			#
+		do	inc			#
+		do	swap			#
+		do	popret			#
 		do	dec
 		goto	2b
 
-0:	do	drop2
-	do	popret
+0:	do	drop2				# (Count)
+	do	popret				#
 	do	drop
 	do	false
 	endword
