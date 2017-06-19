@@ -300,17 +300,25 @@ strcmp:		forthword
 	do	swap
 	do	fetch
 	do	equal
-	do	dup
-	do	pushret
-	unless	1f
+	unless	0f
 		do	over
 		do	fetch
 		const	8
 		do	divide
-		do	dotdot
-		do	drop2
-1:	do	drop2
-	do	popret
+		do	swap
+		do	pushret			# Quotient
+		do	dup			#
+		do	pushret			# # Remainder
+		do	plus			# #
+		do	swap			# #
+		do	popret			# #
+		do	plus			#
+		do	popret			#
+		do	inc
+		do	quadcmp
+		endword
+0:	do	drop2
+	do	false
 	endword
 
 quadcmp:	forthword
@@ -322,7 +330,7 @@ quadcmp:	forthword
 		endword
 1:	do	pushret
 	do	dup2
-	do	indeq
+	do	indneq
 	if	0f
 		do	inc
 		do	swap
@@ -333,6 +341,7 @@ quadcmp:	forthword
 		goto	2b
 
 0:	do	drop2
+	do	popret
 	do	drop
 	do	false
 	endword
