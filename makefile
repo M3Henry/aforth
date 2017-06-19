@@ -1,6 +1,6 @@
 all: bin/aFORTH
 	@echo Testing...
-	@/bin/echo -ne "WORD PHRASE WORD BOX" | bin/aFORTH
+	@/bin/echo -ne "TEST VERYLONGWORDIE DIFFERENTWORDY DUP" | bin/aFORTH
 
 bin/aFORTH: obj/main.o
 	@echo Linking...

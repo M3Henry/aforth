@@ -33,9 +33,9 @@
 
 .macro	string msg
 	do	dostr
-	.quad	2f - 1f
-1:	.ascii	"\msg\()"
-2:
+	.quad	9f - 8f
+8:	.ascii	"\msg\()"
+9:
 .endm
 
 .macro	say msg
@@ -48,10 +48,10 @@
 .endm
 
 .macro	scratch length
-	const	1f
-	goto	2f
-1:	.skip	\length
-2:
+	const	8f
+	goto	9f
+8:	.skip	\length
+9:
 .endm
 
 .macro	goto label
@@ -108,8 +108,13 @@ quit:		forthword
 	do	inputtest
 	set	numin	0
 	1:	do	getword
+		do	dup
 		do	print
-		do	cr
+		string	"VERYLONGWORDIE"
+		do	strcmp
+		unless	2f
+			say	" *"
+	2:	do	cr
 		get	numin
 		get	numtib
 		do	less
@@ -248,9 +253,9 @@ dotdot:		forthword
 	do	top
 	const	stack
 	do	nequal
-	if	3f
+	if	1f
 		say	"Stack Empty"
-3:	do	_dotdot
+1:	do	_dotdot
 	saycr	"..."
 	endword
 
@@ -287,6 +292,49 @@ max:		forthword
 	if	1f
 		do	swap
 1:	do	drop
+	endword
+
+strcmp:		forthword
+	do	dup2
+	do	fetch
+	do	swap
+	do	fetch
+	do	equal
+	do	dup
+	do	pushret
+	unless	1f
+		do	over
+		do	fetch
+		const	8
+		do	divide
+		do	dotdot
+		do	drop2
+1:	do	drop2
+	do	popret
+	endword
+
+quadcmp:	forthword
+2:	do	dup
+	if	1f
+		do	drop2
+		do	drop
+		do	true
+		endword
+1:	do	pushret
+	do	dup2
+	cmpaddr	nequal
+	if	0f
+		do	inc
+		do	swap
+		do	inc
+		do	swap
+		do	popret
+		do	dec
+		goto	2b
+
+0:	do	drop2
+	do	drop
+	do	false
 	endword
 
 buff:	.quad
@@ -562,6 +610,15 @@ divide:		codeword
 .macro	compare	op
 		codeword
 	cmp	TOS,	(SP)
+	\op	truecmp
+	movq	$0,	(SP)
+	jmp	_drop
+.endm
+
+.macro	cmpaddr	op
+		codeword
+	mov	(SP),	ACC
+	cmp	(TOS),	(ACC)
 	\op	truecmp
 	movq	$0,	(SP)
 	jmp	_drop
