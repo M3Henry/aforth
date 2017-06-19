@@ -2,7 +2,7 @@
 	.quad	\label
 .endm
 
-.macro	forthword
+.macro	forthword name
 	do	enter
 .endm
 
@@ -31,11 +31,15 @@
 	do	store
 .endm
 
-.macro	string msg
-	do	dostr
+.macro	strlit msg
 	.quad	9f - 8f
 8:	.ascii	"\msg\()"
 9:
+.endm
+
+.macro	string msg
+	do	dostr
+	strlit	"\msg\()"
 .endm
 
 .macro	say msg
@@ -88,6 +92,20 @@
 	do	plus
 .endm
 
+.macro	verb name:req altname end
+.ifnb	\end
+	.quad	0
+.else
+	.quad	7b - 8
+.endif
+.ifnb	\altname
+7:	strlit	"\altname\()"
+.else
+7:	strlit	"\name\()"
+.endif
+\name\():
+.endm
+
 	.data
 
 cold:		forthword
@@ -108,13 +126,7 @@ quit:		forthword
 	do	inputtest
 	set	numin	0
 	1:	do	getword
-		do	dup
-		do	print
-		string	"VERYLONGWORDIE"
-		do	strcmp
-		unless	2f
-			say	" *"
-	2:	do	cr
+		do	find
 		get	numin
 		get	numtib
 		do	less
@@ -178,7 +190,28 @@ getword:	forthword
 	do	pad
 	endword
 
-greet:		forthword
+find:		forthword
+	const	dictionaryhead
+2:	do	dup2
+	const	8
+	do	plus
+	do	strcmp
+	unless	1f
+		const	16
+		do	plus
+		do	swap
+		do	fetch
+		do	plus
+		do	execute
+		endword
+1:	do	fetch
+	do	dup
+	if	2b
+	do	drop2
+	endword
+
+verb	greet	"GREET"	end
+		forthword
 	say	"Hello, World!"
 	do	cr
 	endword
@@ -202,7 +235,8 @@ line:		forthword
 	do	cr
 	endword
 
-star:		forthword
+verb	star	"STAR"
+		forthword
 	const	'*'
 	do	emit
 	endword
@@ -222,8 +256,9 @@ numtib:		forthword
 numin:		forthword
 	variable
 	endword
-
-cr:		forthword
+dictionaryhead:
+verb	cr	"CR"
+		forthword
 	const	'\n'
 	do	emit
 	endword
