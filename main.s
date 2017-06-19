@@ -322,7 +322,7 @@ quadcmp:	forthword
 		endword
 1:	do	pushret
 	do	dup2
-	cmpaddr	nequal
+	do	indeq
 	if	0f
 		do	inc
 		do	swap
@@ -618,7 +618,8 @@ divide:		codeword
 .macro	cmpaddr	op
 		codeword
 	mov	(SP),	ACC
-	cmp	(TOS),	(ACC)
+	mov	(ACC),	ACC
+	cmp	(TOS),	ACC
 	\op	truecmp
 	movq	$0,	(SP)
 	jmp	_drop
@@ -628,16 +629,19 @@ truecmp:
 	movq	$-1,	(SP)
 	jmp	_drop
 
-equal:		compare je
+equal:		compare	je
 nequal:		compare	jne
 greater:	compare	jg
-less:		compare jl
+less:		compare	jl
 gequal:		compare	jge
 lequal:		compare	jle
 above:		compare	ja
-below:		compare jb
+below:		compare	jb
 aequal:		compare	jae
 bequal:		compare	jbe
+
+indeq:		cmpaddr	je
+indneq:		cmpaddr	jne
 
 #	Kernel
 
