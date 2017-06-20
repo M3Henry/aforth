@@ -7,7 +7,7 @@
 .endm
 
 .macro	endword
-	do	exit
+	do	EXIT
 .endm
 
 .macro	const val
@@ -44,7 +44,7 @@
 
 .macro	say msg
 	string	"\msg\()"
-	do	print
+	do	PRINT
 .endm
 
 .macro	saycr msg
@@ -69,21 +69,21 @@
 .endm
 
 .macro	test compare:req value:req target:req
-	do	dup
+	do	DUP
 	const	\value
 	do	\compare
 	if	\target
 .endm
 
 .macro	unless label
-	do	not
+	do	NOT
 	if	\label
 .endm
 
 .macro	debug
-	do	dup
+	do	DUP
 	do	dot
-	do	cr
+	do	CR
 .endm
 
 .macro	offset var distance
@@ -92,7 +92,7 @@
 	do	plus
 .endm
 
-.macro	verb name:req altname end
+.macro	verb type:req name:req altname end
 .ifnb	\end
 	.quad	0
 .else
@@ -103,7 +103,7 @@
 .else
 7:	strlit	"\name\()"
 .endif
-\name\():
+\name\():	\type\()word
 .endm
 
 	.data
@@ -119,9 +119,7 @@ abort:		forthword
 quit:		forthword
 	const	10
 	const	4
-	do	flag
-	const	greet
-	do	execute
+	do	FLAG
 	do	dottest
 	do	inputtest
 	set	numin	0
@@ -133,61 +131,61 @@ quit:		forthword
 		if	1b
 	do	dotdot
 	saycr	"Done."
-	do	halt
+	do	HALT
 
 dottest:	forthword
 	const	-1234090
 	do	dot
-	do	cr
+	do	CR
 	endword
 
 inputtest:	forthword
-	do	tib
-	do	dup
+	do	TIB
+	do	DUP
 	const	80
 	say	"Enter something: >"
-	do	accept
-	do	dup
+	do	ACCEPT
+	do	DUP
 	do	numtib
 	do	store
-	do	cr
+	do	CR
 	say	"Read "
-	do	dup
+	do	DUP
 	do	dot
 	saycr	" characters."
 
 	say	"["
-	do	type
+	do	TYPE
 	saycr	"]"
 	endword
 
 getword:	forthword
-	set	pad	0
-	offset	pad	8
+	set	PAD	0
+	offset	PAD	8
 
 1:	get	numin
 	get	numtib
 	do	gequal
 	if	3f
-	do	tib
+	do	TIB
 	get	numin
 	do	plus
 	do	fetchb
 	do	numin
 	do	incaddr
-	do	dup
+	do	DUP
 	const	' '
 	do	equal
 	if	2f
-		do	pad
+		do	PAD
 		do	incaddr
-		do	over
+		do	OVER
 		do	storeb
 		do	inc
 		goto	1b
-2:	do	drop
-3:	do	drop
-	do	pad
+2:	do	DROP
+3:	do	DROP
+	do	PAD
 	endword
 
 find:		forthword
@@ -195,79 +193,76 @@ find:		forthword
 2:	do	dup2
 	const	8
 	do	plus
-	do	strcmp
+	do	STRCMP
 	unless	1f
 		const	16
 		do	plus
-		do	swap
+		do	SWAP
 		do	fetch
 		do	plus
-		do	execute
+		do	EXECUTE
 		endword
 1:	do	fetch
-	do	dup
+	do	DUP
 	if	2b
 	do	drop2
 	endword
 
-verb	greet	"GREET"	end
-		forthword
+verb	forth	greet	GREET	end
 	say	"Hello, World!"
-	do	cr
+	do	CR
 	endword
 
-flag:		forthword
-	1:	do	over
+verb	forth	FLAG
+	1:	do	OVER
 		do	line
 		do	dec
-		do	dup
+		do	DUP
 		if	1b
-	do	drop
-	do	drop
+	do	DROP
+	do	DROP
 	endword
 
 line:		forthword
-	1:	do	star
+	1:	do	STAR
 		do	dec
-		do	dup
+		do	DUP
 		if	1b
-	do	drop
-	do	cr
+	do	DROP
+	do	CR
 	endword
 
-verb	star	"STAR"
-		forthword
+verb	forth	STAR
 	const	'*'
-	do	emit
+	do	EMIT
 	endword
 
-pad:		forthword
+verb	forth	PAD
 	scratch	90
 	endword
 
-tib:		forthword
+verb	forth	TIB
 	scratch	80
 	endword
 
-numtib:		forthword
+verb	forth	numtib	"#TIB"
 	variable
 	endword
 
-numin:		forthword
+verb	forth	numin	"#IN"
 	variable
 	endword
-dictionaryhead:
-verb	cr	"CR"
-		forthword
+
+verb	forth	CR
 	const	'\n'
-	do	emit
+	do	EMIT
 	endword
 
-dot:		forthword
+verb	forth	dot	"."
 	test	gequal	0	1f
 	const	'-'
-	do	emit
-	do	negate
+	do	EMIT
+	do	NEGATE
 1:	do	_dot
 	endword
 
@@ -275,15 +270,15 @@ _dot:		forthword
 	test	less	10	1f
 		const	10
 		do	divide
-		do	swap
+		do	SWAP
 		do	_dot
 1:
 		const	'0'
 		do	plus
-		do	emit
+		do	EMIT
 	endword
 
-dotdot:		forthword
+verb	forth	dotdot	"..."
 	say	"..."
 	do	top
 	const	stack
@@ -303,85 +298,85 @@ _dotdot:	forthword
 		do	_dotdot			#
 		do	popret			#
 		const	'\t'
-		do	emit
-		do	dup
+		do	EMIT
+		do	DUP
 		do	dot
 1:	endword
 
-dup2:		forthword
-	do	over
-	do	over
+verb	forth	dup2	"2DUP"
+	do	OVER
+	do	OVER
 	endword
 
-min:		forthword
+verb	forth	MIN
 	do	dup2
 	do	less
 	if	1f
-		do	swap
-1:	do	drop
+		do	SWAP
+1:	do	DROP
 	endword
 
-max:		forthword
+verb	forth	MAX
 	do	dup2
 	do	greater
 	if	1f
-		do	swap
-1:	do	drop
+		do	SWAP
+1:	do	DROP
 	endword
 
-strcmp:		forthword
+verb	forth	STRCMP
 	do	dup2
 	do	fetch
-	do	swap
+	do	SWAP
 	do	fetch
 	do	equal
 	unless	0f
-		do	over
+		do	OVER
 		do	fetch
 		const	8
 		do	divide
-		do	swap
+		do	SWAP
 		do	pushret			# Quotient
-		do	dup			#
+		do	DUP			#
 		do	pushret			# # Remainder
 		do	plus			# #
-		do	swap			# #
+		do	SWAP			# #
 		do	popret			# #
 		do	plus			#
 		do	popret			#
 		do	inc
-		do	quadcmp
+		do	QUADCMP
 		endword
 0:	do	drop2
-	do	false
+	do	FALSE
 	endword
 
-quadcmp:	forthword
-2:	do	dup
+verb	forth	QUADCMP
+2:	do	DUP
 	if	1f
 		do	drop2
-		do	drop
-		do	true
+		do	DROP
+		do	TRUE
 		endword
 1:	do	pushret				# Count
 	do	dup2				#
 	do	indneq				#
 	if	0f				#
 		do	inc			#
-		do	swap			#
+		do	SWAP			#
 		do	inc			#
-		do	swap			#
+		do	SWAP			#
 		do	popret			#
 		do	dec
 		goto	2b
 
 0:	do	drop2				# (Count)
 	do	popret				#
-	do	drop
-	do	false
+	do	DROP
+	do	FALSE
 	endword
 
-buff:	.quad
+buff:	.quad	0
 
 stack:	.skip	1024	#1048576
 
@@ -426,28 +421,28 @@ stack:	.skip	1024	#1048576
 	advance	SP
 	mov	TOS,	(SP)
 .endm
-dup:		codeword
+verb	code	DUP
 	_dup
 	jmp	next
 
-drop2:		codeword
+verb	code	drop2	"2DROP"
 _drop2:	retreat	SP
 	mov	(SP),	TOS
 	retreat	SP
 	jmp	next
 
-drop:		codeword
+verb	code	DROP
 _drop:	mov	(SP),	TOS
 	retreat	SP
 	jmp	next
 
-swap:		codeword
+verb	code	SWAP
 	push	TOS
 	mov	(SP),	TOS
 	pop	(SP)
 	jmp	next
 
-over:		codeword
+verb	code	OVER
 	push	(SP)
 	_dup
 	pop	TOS
@@ -455,7 +450,7 @@ over:		codeword
 
 #	Output
 
-emit:		codeword
+verb	code	EMIT
 	movq	TOS,	buff
 	mov	$1,	CMD	# system call 1 is write
         mov	$1,	ARGA	# file handle 1 is stdout
@@ -464,7 +459,7 @@ emit:		codeword
         syscall
 	jmp	_drop
 
-print:		codeword
+verb	code	PRINT
 	mov	$1,	CMD
         mov	$1,	ARGA
         mov	(TOS),	ARGC
@@ -472,7 +467,8 @@ print:		codeword
         mov	TOS,	ARGB
 	syscall
 	jmp	_drop
-type:		codeword
+
+verb	code	TYPE
 	mov	$1,	CMD
 	mov	$1,	ARGA
 	mov	(SP),	ARGB
@@ -480,17 +476,17 @@ type:		codeword
 	syscall
 	jmp	_drop2
 
-halt:		codeword
+verb	code	HALT
 	xor     ARGA,	ARGA	# default return code 0
 	sub	$stack, SP
-	jz	_halt
+	jz	1f
 		mov	TOS,	ARGA
-_halt:	mov     $60,	CMD	# system call 60 is exit
+1:	mov     $60,	CMD	# system call 60 is exit
 	syscall
 
 #	Input
 
-accept:		codeword
+verb	code	ACCEPT
 	mov	$0,	CMD
 	mov	$0,	ARGA
 	mov	(SP),	ARGB
@@ -540,7 +536,7 @@ dountil:	codeword
 
 #	Memory management
 
-fetch:		codeword
+verb	code	fetch	"@"
 	mov	(TOS),	TOS
 	jmp	next
 
@@ -549,7 +545,7 @@ fetchb:		codeword
 	and	$0xFF,	TOS
 	jmp	next
 
-store:		codeword
+verb	code	store	"!"
 	mov	(SP),	ACC
 	mov	ACC,	(TOS)
 	jmp	_drop2
@@ -565,83 +561,84 @@ top:		codeword
 	pop	TOS
 	jmp	next
 
-pushret:	codeword
+verb	code	pushret	">R"
 	push	TOS
 	jmp	_drop
 
-popret:		codeword
+verb	code	popret	"R>"
 	_dup
 	pop	TOS
 	jmp	next
 
 #	Logic
 
-true:		codeword
+verb	code	TRUE
 	_dup
 	movq	$-1,	TOS
 	jmp	next
 
-false:		codeword
+verb	code	FALSE
 	_dup
 	xor	TOS,	TOS
 	jmp	next
 
-lshift:		codeword
+verb	code	lshift	"<<"
 	shl	TOS
 	jmp	next
 
-rshift:		codeword
+verb	code	rshift	">>"
 	shr	TOS
 	jmp	next
 
-not:		codeword
+verb	code	NOT
 	not	TOS
 	jmp	next
 
-and:		codeword
+verb	code	AND
 	and	TOS,	(SP)
 	jmp	_drop
 
-or:		codeword
+verb	code	OR
 	or	TOS,	(SP)
 	jmp	_drop
 
-xor:		codeword
+verb	code	XOR
 	xor	TOS,	(SP)
 	jmp	_drop
 
 #	Maths
 
-plus:		codeword
+verb	code	plus	"+"
 	add	TOS,	(SP)
 	jmp	_drop
 
-minus:		codeword
+verb	code	minus	"-"
 	sub	TOS,	(SP)
 	jmp	_drop
 
-inc:		codeword
+verb	code	inc	"1+"
 	inc	TOS
 	jmp	next
 
-dec:		codeword
+verb	code	dec	"1-"
 	dec	TOS
 	jmp	next
 
-incaddr:	codeword
+verb	code	incaddr	"*1+"
 	incq	(TOS)
 	jmp	_drop
 
-decaddr:	codeword
+verb	code	decaddr	"*1-"
 	decq	(TOS)
 	jmp	_drop
 
-negate:		codeword
+verb	code	NEGATE
 	neg	TOS
 	jmp	next
 
-multiply:	codeword
-divide:		codeword
+#multiply:	codeword
+
+verb	code	divide	"/%"
 	xor	%rdx,	%rdx
 	mov	(SP),	%rax
 	div	TOS
@@ -659,8 +656,8 @@ divide:		codeword
 	jmp	_drop
 .endm
 
-.macro	cmpaddr	op
-		codeword
+.macro	cmpaddr	op	name	altname
+verb	code	\name	"\altname\()"
 	mov	(SP),	ACC
 	mov	(ACC),	ACC
 	cmp	(TOS),	ACC
@@ -684,16 +681,17 @@ below:		compare	jb
 aequal:		compare	jae
 bequal:		compare	jbe
 
-indeq:		cmpaddr	je
-indneq:		cmpaddr	jne
+cmpaddr	je	indeq	"@@="
+cmpaddr	jne	indneq	"@@!="
 
 #	Kernel
 
-exit:		codeword
+verb	code	EXIT
 	pop	IP
 	jmp	next
 
-execute:	codeword
+dictionaryhead:
+verb	code	EXECUTE
 	mov	TOS,	WP
 	mov	(SP),	TOS
 	retreat	SP
