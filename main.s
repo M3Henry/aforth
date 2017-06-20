@@ -555,8 +555,8 @@ compare	jb	below	"S<"
 compare	jae	aequal	"S>="
 compare	jbe	bequal	"S<="
 
-cmpaddr	je	indeq	"@@="
-cmpaddr	jne	indneq	"@@<>"
+cmpaddr	je	indeq	"@="
+cmpaddr	jne	indneq	"@<>"
 
 #	Kernel
 
