@@ -25,8 +25,10 @@
 	do	fetch
 .endm
 
-.macro	set var value
+.macro	set var:req value
+.ifnb	\value
 	const	\value
+.endif
 	do	\var
 	do	store
 .endm
@@ -108,23 +110,21 @@
 
 	.data
 
-cold:		forthword
+verb	forth	COLD	"COLD"	end
 _cold:	saycr	"aFORTH alpha \xe2\x9c\x93"
 	set	numtib	0
-	do	abort
+	do	ABORT
 
-abort:		forthword
-	do	quit
+verb	forth	ABORT
+	do	QUIT
 
-quit:		forthword
+verb	forth	QUIT
 	const	10
 	const	4
-	do	FLAG
-	do	dottest
 	do	inputtest
 	set	numin	0
-	1:	do	getword
-		do	find
+	1:	do	WORD
+		do	FIND
 		get	numin
 		get	numtib
 		do	less
@@ -133,12 +133,6 @@ quit:		forthword
 	saycr	"Done."
 	do	HALT
 
-dottest:	forthword
-	const	-1234090
-	do	dot
-	do	CR
-	endword
-
 inputtest:	forthword
 	do	TIB
 	do	DUP
@@ -146,8 +140,7 @@ inputtest:	forthword
 	say	"Enter something: >"
 	do	ACCEPT
 	do	DUP
-	do	numtib
-	do	store
+	set	numtib
 	do	CR
 	say	"Read "
 	do	DUP
@@ -159,7 +152,7 @@ inputtest:	forthword
 	saycr	"]"
 	endword
 
-getword:	forthword
+verb	forth	WORD
 	set	PAD	0
 	offset	PAD	8
 
@@ -188,7 +181,7 @@ getword:	forthword
 	do	PAD
 	endword
 
-find:		forthword
+verb	forth	FIND
 	const	dictionaryhead
 2:	do	dup2
 	const	8
@@ -208,7 +201,7 @@ find:		forthword
 	do	drop2
 	endword
 
-verb	forth	greet	GREET	end
+verb	forth	greet	GREET
 	say	"Hello, World!"
 	do	CR
 	endword
@@ -648,8 +641,8 @@ verb	code	divide	"/%"
 
 #	Comparison
 
-.macro	compare	op
-		codeword
+.macro	compare	op	name	altname
+verb	code	\name	"\altname\()"
 	cmp	TOS,	(SP)
 	\op	truecmp
 	movq	$0,	(SP)
@@ -670,19 +663,19 @@ truecmp:
 	movq	$-1,	(SP)
 	jmp	_drop
 
-equal:		compare	je
-nequal:		compare	jne
-greater:	compare	jg
-less:		compare	jl
-gequal:		compare	jge
-lequal:		compare	jle
-above:		compare	ja
-below:		compare	jb
-aequal:		compare	jae
-bequal:		compare	jbe
+compare	je	equal	"\="
+compare	jne	nequal	"<>"
+compare	jg	greater	">"
+compare	jl	less	"<"
+compare	jge	gequal	">="
+compare	jle	lequal	"<="
+compare	ja	above	"S>"
+compare	jb	below	"S<"
+compare	jae	aequal	"S>="
+compare	jbe	bequal	"S<="
 
 cmpaddr	je	indeq	"@@="
-cmpaddr	jne	indneq	"@@!="
+cmpaddr	jne	indneq	"@@<>"
 
 #	Kernel
 
