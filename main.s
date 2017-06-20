@@ -121,7 +121,19 @@ verb	forth	ABORT
 verb	forth	QUIT
 	const	10
 	const	4
-	do	inputtest
+2:	do	TIB
+	const	80
+	say	"? "
+	do	ACCEPT
+	test	equal	0	1f
+		set	numtib
+		do	INTERPRET
+		do	dotdot
+		goto	2b
+1:	saycr	"Done."
+	do	HALT
+
+verb	forth	INTERPRET
 	set	numin	0
 	1:	do	WORD
 		do	FIND
@@ -129,27 +141,7 @@ verb	forth	QUIT
 		get	numtib
 		do	less
 		if	1b
-	do	dotdot
-	saycr	"Done."
-	do	HALT
-
-inputtest:	forthword
-	do	TIB
-	do	DUP
-	const	80
-	say	"Enter something: >"
-	do	ACCEPT
-	do	DUP
-	set	numtib
-	do	CR
-	say	"Read "
-	do	DUP
-	do	dot
-	saycr	" characters."
-
-	say	"["
-	do	TYPE
-	saycr	"]"
+	saycr	" ok"
 	endword
 
 verb	forth	WORD
@@ -160,23 +152,23 @@ verb	forth	WORD
 	get	numtib
 	do	gequal
 	if	3f
-	do	TIB
-	get	numin
-	do	plus
-	do	fetchb
-	do	numin
-	do	incaddr
-	do	DUP
-	const	' '
-	do	equal
-	if	2f
-		do	PAD
+		do	TIB
+		get	numin
+		do	plus
+		do	fetchb
+		do	numin
 		do	incaddr
-		do	OVER
-		do	storeb
-		do	inc
-		goto	1b
-2:	do	DROP
+		do	DUP
+		const	' '
+		do	lequal
+		if	2f
+			do	PAD
+			do	incaddr
+			do	OVER
+			do	storeb
+			do	inc
+			goto	1b
+	2:	do	DROP
 3:	do	DROP
 	do	PAD
 	endword
@@ -227,6 +219,11 @@ line:		forthword
 
 verb	forth	STAR
 	const	'*'
+	do	EMIT
+	endword
+
+verb	forth	SPACE
+	const	' '
 	do	EMIT
 	endword
 
