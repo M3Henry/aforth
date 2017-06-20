@@ -39,10 +39,9 @@ verb	forth	INTERPRET
 verb	forth	WORD
 	set	PAD	0
 	offset	PAD	8
-
-1:	get	numin
-	get	numtib
-	do	gequal
+1:		get	numin
+		get	numtib
+		do	gequal
 	if	3f
 		do	TIB
 		get	numin
@@ -258,6 +257,17 @@ verb	forth	QUADCMP
 	do	FALSE
 	endword
 
+verb	forth	divdied	"/"
+	do	divide
+	do	DROP
+	endword
+
+verb	forth	mod	"%"
+	do	divide
+	do	SWAP
+	do	DROP
+	endword
+
 buff:	.quad	0
 
 stack:	.skip	1024	#1048576
@@ -402,7 +412,7 @@ dountil:	codeword
 
 #	Memory management
 
-verb	code	fetch	"@"
+verb	code	fetch	"@>"
 	mov	(TOS),	TOS
 	jmp	next
 
@@ -411,7 +421,7 @@ fetchb:		codeword
 	and	$0xFF,	TOS
 	jmp	next
 
-verb	code	store	"!"
+verb	code	store	">@"
 	mov	(SP),	ACC
 	mov	ACC,	(TOS)
 	jmp	_drop2
@@ -456,6 +466,10 @@ verb	code	rshift	">>"
 	shr	TOS
 	jmp	next
 
+verb	code	halve	"2/"
+	sar	TOS
+	jmp	next
+
 verb	code	NOT
 	not	TOS
 	jmp	next
@@ -490,11 +504,11 @@ verb	code	dec	"1-"
 	dec	TOS
 	jmp	next
 
-verb	code	incaddr	"*1+"
+verb	code	incaddr	"@1+"
 	incq	(TOS)
 	jmp	_drop
 
-verb	code	decaddr	"*1-"
+verb	code	decaddr	"@1-"
 	decq	(TOS)
 	jmp	_drop
 
@@ -502,7 +516,11 @@ verb	code	NEGATE
 	neg	TOS
 	jmp	next
 
-#multiply:	codeword
+verb	code	mult	"*"
+	mov	(SP),	%rax
+	mul	TOS
+	mov	%rax,	(SP)
+	jmp	_drop
 
 verb	code	divide	"/%"
 	xor	%rdx,	%rdx
@@ -511,6 +529,14 @@ verb	code	divide	"/%"
 	mov	%rax,	(SP)
 	mov	%rdx,	TOS
 	jmp	next
+
+verb	code	muldiv	"*/%"
+	mov	(SP),	%rax
+	mul	TOS
+	divq	-8(SP)
+	mov	%rax,	-8(SP)
+	mov	%rdx,	(SP)
+	jmp	_drop
 
 #	Comparison
 
