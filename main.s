@@ -18,7 +18,6 @@ verb	forth	QUIT
 	test	equal	0	1f
 		set	numtib
 		do	INTERPRET
-		do	dotdot
 		goto	2b
 1:	saycr	"Done."
 	do	HALT
