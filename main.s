@@ -11,8 +11,6 @@ verb	forth	ABORT
 	do	QUIT
 
 verb	forth	QUIT
-	const	10
-	const	4
 2:	do	TIB
 	const	80
 	say	"? "
@@ -27,14 +25,51 @@ verb	forth	QUIT
 
 verb	forth	INTERPRET
 	set	numin	0
-	1:	do	WORD
+	3:	do	WORD
 		do	FIND
-		get	numin
+		if	1f
+			const	0
+			do	SWAP
+			do	DUP
+			const	8
+			do	plus
+			do	SWAP
+			do	fetch
+			do	CONVERT
+			do	drop2
+			test	greater	0	2f
+				do	DROP
+			goto	2f
+		1:	do	EXECUTE
+	2:	get	numin
 		get	numtib
 		do	less
-		if	1b
+		if	3b
 	saycr	" ok"
 	endword
+
+verb	forth	CONVERT
+2:	test	equal	0	1f
+	do	pushret
+	do	DUP
+	do	pushret
+	do	fetchb
+	const	'0'
+	do	minus
+	test	greater	9	0f
+		do	SWAP
+		const	10
+		do	mult
+		do	plus
+		do	popret
+		do	inc
+		do	popret
+		do	dec
+		goto	2b
+0:	do	DROP
+	do	popret
+	do	popret
+1:	endword
 
 verb	forth	WORD
 	set	PAD	0
@@ -76,12 +111,13 @@ verb	forth	FIND
 		do	SWAP
 		do	fetch
 		do	plus
-		do	EXECUTE
+		do	TRUE
 		endword
 1:	do	fetch
 	do	DUP
 	if	2b
-	do	drop2
+	do	DROP
+	do	FALSE
 	endword
 
 verb	forth	greet	GREET
@@ -453,7 +489,7 @@ verb	code	TRUE
 	movq	$-1,	TOS
 	jmp	next
 
-verb	code	FALSE
+verb	code	FALSE	"0"
 	_dup
 	xor	TOS,	TOS
 	jmp	next
