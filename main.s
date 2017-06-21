@@ -98,6 +98,23 @@ verb	forth	WORD
 	do	PAD
 	endword
 
+verb	forth	DICTIONARY
+	const	dictionaryhead
+2:	do	DUP
+	do	fetch
+	const	0
+	do	equal
+	if	1f
+		do	DUP
+		const	8
+		do	plus
+		do	PRINT
+		do	fetch
+		do	SPACE
+		goto	2b
+1:	do	DROP
+	endword
+
 verb	forth	FIND
 	const	dictionaryhead
 2:	do	dup2
@@ -161,11 +178,11 @@ verb	forth	TIB
 	scratch	80
 	endword
 
-verb	forth	numtib	"#TIB"
+verb	forth	numtib	"\#TIB"
 	variable
 	endword
 
-verb	forth	numin	"#IN"
+verb	forth	numin	"\#IN"
 	variable
 	endword
 
