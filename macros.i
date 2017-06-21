@@ -53,6 +53,10 @@
 	say	"\msg\()\n"
 .endm
 
+.macro	escape val
+	say	"\x1B[\val\()m"
+.endm
+
 .macro	scratch length
 	const	8f
 	goto	9f

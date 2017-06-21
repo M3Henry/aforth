@@ -4,7 +4,9 @@
 
 verb	forth	COLD	"COLD"	end
 _cold:	do	RESETDATA
-	saycr	"\x1B[1m\x1B[96maFORTH alpha\x1B[0m"
+	escape	0
+	escape	96
+	saycr	"aFORTH alpha"
 	set	numtib	0
 	do	QUIT
 
@@ -16,14 +18,17 @@ verb	forth	QUIT
 #	do	RESETRETURN
 2:	do	TIB
 	const	80
-	say	"\x1B[93m➤ "
+	escape	93
+	say	"➤ "
 	do	ACCEPT
-	say	"\x1B[0m"
+	escape	0
 	test	equal	0	1f
 		set	numtib
 		do	INTERPRET
 		goto	2b
-1:	saycr	"\x1B[1m\x1B[96mDone.\x1B[0m"
+1:	escape	96
+	saycr	"Done."
+	escape	0
 	do	HALT
 
 verb	forth	INTERPRET
@@ -48,7 +53,8 @@ verb	forth	INTERPRET
 			test	greater	0	2f
 				do	DROP
 				do	PAD
-				say	"\x1B[91mUnknown token: "
+				escape	91
+				say	"Unknown token: "
 				do	PRINT
 				do	CR
 				do	ABORT
@@ -58,9 +64,10 @@ verb	forth	INTERPRET
 		get	numtib
 		do	less
 		if	3b
+	escape	92
 	do	DEPTH
 	test	equal	0	4f
-	say	"\x1B[92m ⏎ "
+	say	" ⏎ "
 	test	equal	1	5f
 	do	DUP
 	do	dot
@@ -71,7 +78,7 @@ verb	forth	INTERPRET
 	saycr	"]"
 	endword
 4:	do	DROP
-	saycr	"\x1B[92m 🗸"
+	saycr	" 🗸"
 	endword
 
 verb	forth	CONVERT

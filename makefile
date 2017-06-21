@@ -1,6 +1,6 @@
 all: bin/aFORTH
 	@echo Testing...
-	@/bin/echo -ne "+ . CR WORDY GREET" | bin/aFORTH
+	@/bin/echo -ne "12 DUP * . CR 10 4 FLAG" | bin/aFORTH
 
 interactive: bin/aFORTH
 	@bin/aFORTH
