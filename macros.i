@@ -133,6 +133,7 @@
 
 .macro	compare	op	name	altname
 verb	code	\name	"\altname\()"
+	minstk	2
 	cmp	TOS,	(SP)
 	\op	truecmp
 	movq	$0,	(SP)
@@ -141,10 +142,19 @@ verb	code	\name	"\altname\()"
 
 .macro	cmpaddr	op	name	altname
 verb	code	\name	"\altname\()"
+	minstk	2
 	mov	(SP),	ACC
 	mov	(ACC),	ACC
 	cmp	(TOS),	ACC
 	\op	truecmp
 	movq	$0,	(SP)
 	jmp	_drop
+.endm
+
+.macro	minstk	depth:req
+	cmp	$stack + ( \depth * 8 ), SP
+	jge	1f
+		mov	$_uflow,	IP
+		jmp	next
+1:
 .endm

@@ -210,7 +210,7 @@ verb	forth	dot	"."
 _dot:		forthword
 	test	less	10	1f
 		const	10
-		do	divide
+		do	divmod
 		do	SWAP
 		do	_dot
 1:
@@ -275,7 +275,7 @@ verb	forth	STRCMP
 		do	OVER
 		do	fetch
 		const	8
-		do	divide
+		do	divmod
 		do	SWAP
 		do	pushret			# Quotient
 		do	DUP			#
@@ -317,14 +317,19 @@ verb	forth	QUADCMP
 	do	FALSE
 	endword
 
-verb	forth	divdied	"/"
-	do	divide
+verb	forth	divide	"/"
+	do	divmod
 	do	DROP
 	endword
 
 verb	forth	mod	"%"
-	do	divide
+	do	divmod
 	do	SWAP
+	do	DROP
+	endword
+
+verb	forth	muldiv	"*/"
+	do	muldivmod
 	do	DROP
 	endword
 
@@ -356,6 +361,7 @@ stack:	.skip	1024	#1048576
 	.set	ARGE,	%r8
 	.set	ARGF,	%r9
 
+
 #	Stack manipulation
 
 verb	code	RESETDATA
@@ -367,35 +373,37 @@ verb	code	RESETRETURN
 	jmp	next
 
 verb	code	DUP
+	minstk	1
 	_dup
 	jmp	next
 
 verb	code	drop2	"2DROP"
+	minstk	2
 _drop2:	retreat	SP
 	mov	(SP),	TOS
 	retreat	SP
 	jmp	next
 
 verb	code	DROP
+	minstk	1
 _drop:	mov	(SP),	TOS
 	retreat	SP
-	cmp	$stack,	SP
-	jge	next		# normal operation
-	mov	$1f,	IP
 	jmp	next
 
-1:	do	RESETDATA
+_uflow:	do	RESETDATA
 	do	CR
 	saycr	"Stack underflow!"
 	do	QUIT
 
 verb	code	SWAP
+	minstk	2
 	push	TOS
 	mov	(SP),	TOS
 	pop	(SP)
 	jmp	next
 
 verb	code	OVER
+	minstk	2
 	push	(SP)
 	_dup
 	pop	TOS
@@ -404,6 +412,7 @@ verb	code	OVER
 #	Output
 
 verb	code	EMIT
+	minstk	1
 	movq	TOS,	buff
 	mov	$1,	CMD	# system call 1 is write
         mov	$1,	ARGA	# file handle 1 is stdout
@@ -413,6 +422,7 @@ verb	code	EMIT
 	jmp	_drop
 
 verb	code	PRINT
+	minstk	1
 	mov	$1,	CMD
         mov	$1,	ARGA
         mov	(TOS),	ARGC
@@ -422,6 +432,7 @@ verb	code	PRINT
 	jmp	_drop
 
 verb	code	TYPE
+	minstk	2
 	mov	$1,	CMD
 	mov	$1,	ARGA
 	mov	(SP),	ARGB
@@ -440,6 +451,7 @@ _halt:	xor     ARGA,	ARGA	# default return code 0
 #	Input
 
 verb	code	ACCEPT
+	minstk	2
 	mov	$0,	CMD
 	mov	$0,	ARGA
 	mov	(SP),	ARGB
@@ -474,6 +486,7 @@ dogoto:		codeword
 	jmp	next
 
 dobranch:	codeword
+	minstk	1
 	cmp	$0,	TOS
 	je	__brk
 	mov	(IP),	IP
@@ -482,6 +495,7 @@ __brk:	advance	IP
 	jmp	_drop
 
 dountil:	codeword
+	minstk	1
 	cmp	$0,	TOS
 	jne	__brk
 	sub	(IP),	IP
@@ -490,20 +504,24 @@ dountil:	codeword
 #	Memory management
 
 verb	code	fetch	"@>"
+	minstk	1
 	mov	(TOS),	TOS
 	jmp	next
 
 fetchb:		codeword
+	minstk	1
 	movb	(TOS),	TOSB
 	and	$0xFF,	TOS
 	jmp	next
 
 verb	code	store	">@"
+	minstk	2
 	mov	(SP),	ACC
 	mov	ACC,	(TOS)
 	jmp	_drop2
 
 storeb:		codeword
+	minstk	2
 	mov	(SP),	ACC
 	movb	ACCB,	(TOS)
 	jmp	_drop2
@@ -515,6 +533,7 @@ top:		codeword
 	jmp	next
 
 verb	code	pushret	">R"
+	minstk	1
 	push	TOS
 	jmp	_drop
 
@@ -536,70 +555,86 @@ verb	code	FALSE	"0"
 	jmp	next
 
 verb	code	lshift	"<<"
+	minstk	1
 	shl	TOS
 	jmp	next
 
 verb	code	rshift	">>"
+	minstk	1
 	shr	TOS
 	jmp	next
 
 verb	code	halve	"2/"
+	minstk	1
 	sar	TOS
 	jmp	next
 
 verb	code	NOT
+	minstk	1
 	not	TOS
 	jmp	next
 
 verb	code	AND
+	minstk	2
 	and	TOS,	(SP)
 	jmp	_drop
 
 verb	code	OR
+	minstk	2
 	or	TOS,	(SP)
 	jmp	_drop
 
 verb	code	XOR
+	minstk	2
 	xor	TOS,	(SP)
 	jmp	_drop
 
 #	Maths
 
 verb	code	plus	"+"
+	minstk	2
 	add	TOS,	(SP)
 	jmp	_drop
 
 verb	code	minus	"-"
+	minstk	2
 	sub	TOS,	(SP)
 	jmp	_drop
 
 verb	code	inc	"1+"
+	minstk	1
 	inc	TOS
 	jmp	next
 
 verb	code	dec	"1-"
+	minstk	1
 	dec	TOS
 	jmp	next
 
 verb	code	incaddr	"@1+"
+	minstk	1
 	incq	(TOS)
 	jmp	_drop
 
 verb	code	decaddr	"@1-"
+	minstk	1
 	decq	(TOS)
 	jmp	_drop
 
 verb	code	NEGATE
+	minstk	1
 	neg	TOS
 	jmp	next
 
 verb	code	mult	"*"
+	minstk	2
 	mov	(SP),	%rax
 	mul	TOS
 	mov	%rax,	(SP)
 	jmp	_drop
 
-verb	code	divide	"/%"
+verb	code	divmod	"/%"
+	minstk	2
 	xor	%rdx,	%rdx
 	mov	(SP),	%rax
 	div	TOS
@@ -607,7 +642,8 @@ verb	code	divide	"/%"
 	mov	%rdx,	TOS
 	jmp	next
 
-verb	code	muldiv	"*/%"
+verb	code	muldivmod	"*/%"
+	minstk	3
 	mov	(SP),	%rax
 	mul	TOS
 	divq	-8(SP)
@@ -643,6 +679,7 @@ verb	code	EXIT
 
 dictionaryhead:
 verb	code	EXECUTE
+	minstk	1
 	mov	TOS,	WP
 	mov	(SP),	TOS
 	retreat	SP
@@ -650,8 +687,7 @@ verb	code	EXECUTE
 
 	.text
 
-_start:	#mov	$stack,	SP
-	movq	%rsp,	rspbk
+_start:	movq	%rsp,	rspbk
 	mov	$_cold,	IP
 next:
 	mov	(IP),	WP
