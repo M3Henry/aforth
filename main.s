@@ -29,7 +29,12 @@ verb	forth	QUIT
 verb	forth	INTERPRET
 	set	numin	0
 	3:	do	WORD
-		do	FIND
+		do	DUP
+		do	fetch
+		if	0f
+			do	DROP
+			goto	2f
+	0:	do	FIND
 		if	1f
 			const	0
 			do	SWAP
@@ -53,7 +58,14 @@ verb	forth	INTERPRET
 		get	numtib
 		do	less
 		if	3b
-	saycr	"\x1B[92m ⏎"
+	do	DEPTH
+	test	equal	0	4f
+	say	"\x1B[92m ⏎ "
+	do	dot
+	do	CR
+	endword
+4:	do	DROP
+	saycr	"\x1B[92m 🗸"
 	endword
 
 verb	forth	CONVERT
@@ -502,6 +514,16 @@ dountil:	codeword
 	jmp	_drop
 
 #	Memory management
+
+verb	code	DEPTH
+	mov	SP,	ACC
+	sub	$stack,	ACC
+	shr	ACC
+	shr	ACC
+	shr	ACC
+	_dup
+	mov	ACC,	TOS
+	jmp	next
 
 verb	code	fetch	"@>"
 	minstk	1
