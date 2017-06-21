@@ -4,7 +4,7 @@
 
 verb	forth	COLD	"COLD"	end
 _cold:	do	RESETDATA
-	saycr	"aFORTH alpha ✓"
+	saycr	"\x1B[1m\x1B[96maFORTH alpha\x1B[0m"
 	set	numtib	0
 	do	QUIT
 
@@ -16,13 +16,14 @@ verb	forth	QUIT
 #	do	RESETRETURN
 2:	do	TIB
 	const	80
-	say	"➤ "
+	say	"\x1B[93m➤ "
 	do	ACCEPT
+	say	"\x1B[0m"
 	test	equal	0	1f
 		set	numtib
 		do	INTERPRET
 		goto	2b
-1:	saycr	"Done."
+1:	saycr	"\x1B[1m\x1B[96mDone.\x1B[0m"
 	do	HALT
 
 verb	forth	INTERPRET
@@ -42,7 +43,7 @@ verb	forth	INTERPRET
 			test	greater	0	2f
 				do	DROP
 				do	PAD
-				say	"Unknown token: "
+				say	"\x1B[91mUnknown token: "
 				do	PRINT
 				do	CR
 				do	ABORT
@@ -52,7 +53,7 @@ verb	forth	INTERPRET
 		get	numtib
 		do	less
 		if	3b
-	saycr	" ok"
+	saycr	"\x1B[92m ⏎"
 	endword
 
 verb	forth	CONVERT
@@ -391,8 +392,7 @@ _drop:	mov	(SP),	TOS
 	jmp	next
 
 _uflow:	do	RESETDATA
-	do	CR
-	saycr	"Stack underflow!"
+	saycr	"\x1B[91m Stack underflow!"
 	do	QUIT
 
 verb	code	SWAP
