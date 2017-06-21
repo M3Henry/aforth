@@ -352,6 +352,11 @@ verb	forth	muldiv	"*/"
 	do	DROP
 	endword
 
+verb	forth	iszero	"0="
+	do	FALSE
+	do	equal
+	endword
+
 rspbk:	.quad	0
 
 buff:	.quad	0
