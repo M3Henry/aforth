@@ -61,8 +61,14 @@ verb	forth	INTERPRET
 	do	DEPTH
 	test	equal	0	4f
 	say	"\x1B[92m ⏎ "
+	test	equal	1	5f
+	do	DUP
 	do	dot
-	do	CR
+5:	do	DROP
+	say	"["
+	do	DUP
+	do	dot
+	saycr	"]"
 	endword
 4:	do	DROP
 	saycr	"\x1B[92m 🗸"
