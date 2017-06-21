@@ -3,17 +3,20 @@
 	.data
 
 verb	forth	COLD	"COLD"	end
-_cold:	saycr	"aFORTH alpha \xe2\x9c\x93"
+_cold:	do	RESETDATA
+	saycr	"aFORTH alpha ✓"
 	set	numtib	0
-	do	ABORT
+	do	QUIT
 
 verb	forth	ABORT
+	do	RESETDATA
 	do	QUIT
 
 verb	forth	QUIT
+#	do	RESETRETURN
 2:	do	TIB
 	const	80
-	say	"? "
+	say	"➤ "
 	do	ACCEPT
 	test	equal	0	1f
 		set	numtib
@@ -38,6 +41,11 @@ verb	forth	INTERPRET
 			do	drop2
 			test	greater	0	2f
 				do	DROP
+				do	PAD
+				say	"Unknown token: "
+				do	PRINT
+				do	CR
+				do	ABORT
 			goto	2f
 		1:	do	EXECUTE
 	2:	get	numin
@@ -320,6 +328,8 @@ verb	forth	mod	"%"
 	do	DROP
 	endword
 
+rspbk:	.quad	0
+
 buff:	.quad	0
 
 stack:	.skip	1024	#1048576
@@ -346,8 +356,15 @@ stack:	.skip	1024	#1048576
 	.set	ARGE,	%r8
 	.set	ARGF,	%r9
 
-
 #	Stack manipulation
+
+verb	code	RESETDATA
+	mov	$stack,	SP
+	jmp	next
+
+verb	code	RESETRETURN
+	mov	rspbk,	%rsp
+	jmp	next
 
 verb	code	DUP
 	_dup
@@ -362,7 +379,15 @@ _drop2:	retreat	SP
 verb	code	DROP
 _drop:	mov	(SP),	TOS
 	retreat	SP
+	cmp	$stack,	SP
+	jge	next		# normal operation
+	mov	$1f,	IP
 	jmp	next
+
+1:	do	RESETDATA
+	do	CR
+	saycr	"Stack underflow!"
+	do	QUIT
 
 verb	code	SWAP
 	push	TOS
@@ -405,7 +430,7 @@ verb	code	TYPE
 	jmp	_drop2
 
 verb	code	HALT
-	xor     ARGA,	ARGA	# default return code 0
+_halt:	xor     ARGA,	ARGA	# default return code 0
 	sub	$stack, SP
 	jz	1f
 		mov	TOS,	ARGA
@@ -625,7 +650,8 @@ verb	code	EXECUTE
 
 	.text
 
-_start:	mov	$stack,	SP
+_start:	#mov	$stack,	SP
+	movq	%rsp,	rspbk
 	mov	$_cold,	IP
 next:
 	mov	(IP),	WP
