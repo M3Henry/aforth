@@ -423,15 +423,15 @@ verb	code	DUP
 
 verb	code	drop2	"2DROP"
 	minstk	2
-_drop2:	retreat	SP
+_drop2:	advance	SP
 	mov	(SP),	TOS
-	retreat	SP
+	advance	SP
 	jmp	next
 
 verb	code	DROP
 	minstk	1
 _drop:	mov	(SP),	TOS
-	retreat	SP
+	advance	SP
 	jmp	next
 
 _uflow:	do	RESETDATA
@@ -547,8 +547,8 @@ dountil:	codeword
 #	Memory management
 
 verb	code	DEPTH
-	mov	SP,	ACC
-	sub	$stack,	ACC
+	mov	$stack,	ACC
+	sub	SP,	ACC
 	shr	ACC
 	shr	ACC
 	shr	ACC
@@ -735,13 +735,14 @@ verb	code	EXECUTE
 	minstk	1
 	mov	TOS,	WP
 	mov	(SP),	TOS
-	retreat	SP
+	advance	SP
 	jmp	*(WP)
 
 
 # "STACK"
 
-stack:	.skip	1048576
+	.skip	1048576
+stack:	.quad	0
 
 # "CORE VARIABLES"
 

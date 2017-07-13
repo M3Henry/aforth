@@ -129,7 +129,7 @@
 #	Stack manipulation
 
 .macro	_dup
-	advance	SP
+	retreat	SP
 	mov	TOS,	(SP)
 .endm
 
@@ -156,8 +156,8 @@ verb	code	\name	"\altname\()"
 .endm
 
 .macro	minstk	depth:req
-	cmp	$stack + ( \depth * 8 ), SP
-	jge	1f
+	cmp	$stack - ( \depth * 8 ), SP
+	jle	1f
 		mov	$_uflow,	IP
 		jmp	next
 1:
