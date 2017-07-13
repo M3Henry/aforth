@@ -1,5 +1,44 @@
 .include	"macros.i"
 
+# "REGISTERS"
+
+	.text
+
+	.set	TOS,	%r15
+	.set	TOSB,	%r15b
+	.set	SP,	%r14
+	.set	IP,	%r13
+	.set	WP,	%r12
+	.set	ACC,	%r11
+	.set	ACCB,	%r11b
+
+	.set	CMD,	%rax
+	.set	ARGA,	%rdi
+	.set	ARGB,	%rsi
+	.set	ARGC,	%rdx
+	.set	ARGD,	%r10
+	.set	ARGE,	%r8
+	.set	ARGF,	%r9
+
+# Kernel
+
+	.global _start
+
+_start:	movq	%rsp,	rspbk
+	mov	$_cold,	IP
+next:
+	mov	(IP),	WP
+	advance	IP
+	jmp	*(WP)
+
+enter:
+	push	IP
+	mov	WP,	IP
+	advance	IP
+	jmp	next
+
+# "DICTIONARY"
+
 	.data
 
 verb	forth	COLD	"COLD"	end
@@ -15,7 +54,7 @@ verb	forth	ABORT
 	do	QUIT
 
 verb	forth	QUIT
-#	do	RESETRETURN
+	do	RESETRETURN	# was commented out?
 2:	do	TIB
 	const	80
 	escape	93
@@ -364,33 +403,7 @@ verb	forth	iszero	"0="
 	do	equal
 	endword
 
-rspbk:	.quad	0
-
-buff:	.quad	0
-
-stack:	.skip	1024	#1048576
-
-#	Codewords
-
-	.global _start
-
-	.text
-
-	.set	TOS,	%r15
-	.set	TOSB,	%r15b
-	.set	SP,	%r14
-	.set	IP,	%r13
-	.set	WP,	%r12
-	.set	ACC,	%r11
-	.set	ACCB,	%r11b
-
-	.set	CMD,	%rax
-	.set	ARGA,	%rdi
-	.set	ARGB,	%rsi
-	.set	ARGC,	%rdx
-	.set	ARGD,	%r10
-	.set	ARGE,	%r8
-	.set	ARGF,	%r9
+# "CODEWORDS"
 
 
 #	Stack manipulation
@@ -725,17 +738,13 @@ verb	code	EXECUTE
 	retreat	SP
 	jmp	*(WP)
 
-	.text
 
-_start:	movq	%rsp,	rspbk
-	mov	$_cold,	IP
-next:
-	mov	(IP),	WP
-	advance	IP
-	jmp	*(WP)
+# "STACK"
 
-enter:
-	push	IP
-	mov	WP,	IP
-	advance	IP
-	jmp	next
+stack:	.skip	1048576
+
+# "CORE VARIABLES"
+
+rspbk:	.quad	0
+
+buff:	.quad	0
