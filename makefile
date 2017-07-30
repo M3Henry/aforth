@@ -1,6 +1,6 @@
 all: bin/aFORTH
 	@echo Testing...
-	@/bin/echo -ne "12 DUP * . CR 10 4 FLAG" | bin/aFORTH
+	@/bin/echo -ne "12 DUP * . CR 10 4 FLAG ] GREET [ GREET" | bin/aFORTH
 
 interactive: bin/aFORTH
 	@bin/aFORTH

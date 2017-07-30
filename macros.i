@@ -15,9 +15,13 @@
 	.quad	\val
 .endm
 
-.macro	variable
+.macro	variable init
 	do	dovar
+.ifnb	\init
+	.quad	\init
+.else
 	.quad	0
+.endif
 .endm
 
 .macro	get var

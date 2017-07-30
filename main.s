@@ -46,6 +46,7 @@ enter:
 	.quad	0
 COLD:	forthword
 _cold:	do	RESETDATA
+	set	HEREVAR	dictionaryhead
 	escape	0
 	escape	96
 	saycr	"aFORTH alpha"
@@ -209,7 +210,7 @@ verb	forth	WORD
 	endword
 
 verb	forth	DICTIONARY
-	const	dictionaryhead
+	do	HERE
 2:	do	DUP
 	do	fetch
 	const	0
@@ -225,8 +226,16 @@ verb	forth	DICTIONARY
 1:	do	DROP
 	endword
 
+verb	forth	HEREVAR
+	variable
+	endword
+
+verb	forth	HERE
+	get	HEREVAR
+	endword
+
 verb	forth	FIND
-	const	dictionaryhead
+	do	HERE
 2:	do	dup2
 	const	8
 	do	plus
