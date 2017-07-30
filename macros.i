@@ -2,7 +2,7 @@
 	.quad	\label
 .endm
 
-.macro	forthword name
+.macro	forthword
 	do	enter
 .endm
 
@@ -98,17 +98,19 @@
 	do	plus
 .endm
 
-.macro	verb type:req name:req altname end
-.ifnb	\end
-	.quad	0
-.else
+.macro	verb type:req name:req altname immediate
 	.quad	7b - 8
-.endif
 .ifnb	\altname
 7:	strlit	"\altname\()"
 .else
 7:	strlit	"\name\()"
 .endif
+.ifnb	\immediate
+	.quad	-1
+.else
+	.quad	0
+.endif
+
 \name\():	\type\()word
 .endm
 

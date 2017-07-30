@@ -41,7 +41,10 @@ enter:
 
 	.data
 
-verb	forth	COLD	"COLD"	end
+	.quad	0
+7:	strlit	"COLD"
+	.quad	0
+COLD:	forthword
 _cold:	do	RESETDATA
 	escape	0
 	escape	96
@@ -88,6 +91,10 @@ verb	forth	numin	"\#IN"
 	variable
 	endword
 
+verb	forth	MODE
+	variable
+	endword
+
 verb	forth	INTERPRET
 	set	numin	0
 	3:	do	WORD
@@ -116,7 +123,9 @@ verb	forth	INTERPRET
 				do	CR
 				do	ABORT
 			goto	2f
-		1:	do	EXECUTE
+		1:	const	8
+			do	plus
+			do	EXECUTE
 	2:	get	numin
 		get	numtib
 		do	less
