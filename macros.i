@@ -105,7 +105,7 @@
 .else
 7:	strlit	"\name\()"
 .endif
-.ifnb	\immediate
+.ifb	\immediate
 	.quad	-1
 .else
 	.quad	0

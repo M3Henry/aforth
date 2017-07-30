@@ -123,9 +123,19 @@ verb	forth	INTERPRET
 				do	CR
 				do	ABORT
 			goto	2f
-		1:	const	8
+		1:	do	DUP
+			const	8
 			do	plus
-			do	EXECUTE
+			do	SWAP
+			do	fetch
+			get	MODE
+			do	AND
+			if	1f
+				do	EXECUTE
+				goto	2f
+		1:	say	"!"
+			do	dot
+			saycr	"!"
 	2:	get	numin
 		get	numtib
 		do	less
@@ -234,6 +244,16 @@ verb	forth	FIND
 	if	2b
 	do	DROP
 	do	FALSE
+	endword
+
+#	Compiler
+
+verb	forth	modeI	"["	immediate
+	set	MODE	0
+	endword
+
+verb	forth	modeC	"]"
+	set	MODE	-1
 	endword
 
 #	User Words
