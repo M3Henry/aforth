@@ -70,6 +70,24 @@ verb	forth	QUIT
 	escape	0
 	do	HALT
 
+#	Interpreter
+
+verb	forth	PAD
+	scratch	90
+	endword
+
+verb	forth	TIB
+	scratch	80
+	endword
+
+verb	forth	numtib	"\#TIB"
+	variable
+	endword
+
+verb	forth	numin	"\#IN"
+	variable
+	endword
+
 verb	forth	INTERPRET
 	set	numin	0
 	3:	do	WORD
@@ -209,6 +227,8 @@ verb	forth	FIND
 	do	FALSE
 	endword
 
+#	User Words
+
 verb	forth	greet	GREET
 	say	"Hello, World!"
 	do	CR
@@ -225,7 +245,8 @@ verb	forth	FLAG
 	endword
 
 line:		forthword
-	1:	do	STAR
+	1:	const	'*'
+		do	EMIT
 		do	dec
 		do	DUP
 		if	1b
@@ -233,30 +254,9 @@ line:		forthword
 	do	CR
 	endword
 
-verb	forth	STAR
-	const	'*'
-	do	EMIT
-	endword
-
 verb	forth	SPACE
 	const	' '
 	do	EMIT
-	endword
-
-verb	forth	PAD
-	scratch	90
-	endword
-
-verb	forth	TIB
-	scratch	80
-	endword
-
-verb	forth	numtib	"\#TIB"
-	variable
-	endword
-
-verb	forth	numin	"\#IN"
-	variable
 	endword
 
 verb	forth	CR
