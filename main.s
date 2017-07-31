@@ -46,7 +46,8 @@ enter:
 	.quad	0
 COLD:	forthword
 _cold:	do	RESETDATA
-	set	HEREVAR	dictionaryhead
+	set	LAST	dictionaryhead
+	set	HERE	dictionaryend
 	escape	0
 	escape	96
 	saycr	"aFORTH alpha"
@@ -209,8 +210,12 @@ verb	forth	WORD
 	do	PAD
 	endword
 
+verb	forth	LAST
+	variable
+	endword
+
 verb	forth	DICTIONARY
-	do	HERE
+	get	LAST
 2:	do	DUP
 	do	fetch
 	const	0
@@ -226,16 +231,8 @@ verb	forth	DICTIONARY
 1:	do	DROP
 	endword
 
-verb	forth	HEREVAR
-	variable
-	endword
-
-verb	forth	HERE
-	get	HEREVAR
-	endword
-
 verb	forth	FIND
-	do	HERE
+	get	LAST
 2:	do	dup2
 	const	8
 	do	plus
@@ -256,6 +253,10 @@ verb	forth	FIND
 	endword
 
 #	Compiler
+
+verb	forth	HERE
+	variable
+	endword
 
 verb	forth	modeI	"["	immediate
 	set	MODE	0
@@ -775,7 +776,7 @@ verb	code	EXECUTE
 	mov	(SP),	TOS
 	advance	SP
 	jmp	*(WP)
-
+dictionaryend:
 
 # "STACK"
 
