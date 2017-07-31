@@ -3,7 +3,7 @@
 .endm
 
 .macro	forthword
-	do	enter
+	do	ENTER
 .endm
 
 .macro	endword

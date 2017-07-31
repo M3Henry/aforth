@@ -60,6 +60,7 @@ verb	forth	ABORT
 
 verb	forth	QUIT
 	do	RESETRETURN	# was commented out?
+	do	modeI
 2:	do	TIB
 	const	80
 	escape	93
@@ -118,7 +119,7 @@ verb	forth	INTERPRET
 			do	drop2
 			test	greater	0	2f
 				do	DROP
-				do	PAD
+				get	HERE
 				escape	91
 				say	"Unknown token: "
 				do	PRINT
@@ -183,8 +184,12 @@ verb	forth	CONVERT
 1:	endword
 
 verb	forth	WORD
-	set	PAD	0
-	offset	PAD	8
+	get	HERE
+	const	0
+	do	OVER
+	do	store
+	const	8
+	do	plus
 1:		get	numin
 		get	numtib
 		do	gequal
@@ -199,7 +204,7 @@ verb	forth	WORD
 		const	' '
 		do	lequal
 		if	2f
-			do	PAD
+			get	HERE
 			do	incaddr
 			do	OVER
 			do	storeb
@@ -207,7 +212,7 @@ verb	forth	WORD
 			goto	1b
 	2:	do	DROP
 3:	do	DROP
-	do	PAD
+	get	HERE
 	endword
 
 verb	forth	LAST
@@ -266,20 +271,25 @@ verb	forth	modeC	"]"
 	set	MODE	-1
 	endword
 
-verb	forth	COMPILE	"COMPILE"	immediate
+verb	forth	ALLOT
 	get	HERE
-	do	store
-	get	HERE
-	const	8
+	do	plus
 	set	HERE
 	endword
 
-verb	forth	compnew	"colon"
+verb	forth	COMPILE	"COMPILE"	immediate
+	get	HERE
+	do	store
+	const	8
+	do	ALLOT
+	endword
+
+verb	forth	compnew	"\x3A"				# :
 	do	modeC
 	get	LAST
 	do	COMPILE
+	endword
 	do	WORD
-	get	HERE
 	do	DUP
 	do	fetch
 	do	plus
@@ -292,7 +302,7 @@ verb	forth	compnew	"colon"
 	do	COMPILE
 	endword
 
-verb	forth	compend	";"	immediate
+verb	forth	compend	"\x3B"	immediate		# ;
 	const	EXIT
 	do	COMPILE
 	do	modeI
