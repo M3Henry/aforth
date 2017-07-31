@@ -3,7 +3,7 @@
 .endm
 
 .macro	forthword
-	do	ENTER
+	.quad	enter
 .endm
 
 .macro	endword

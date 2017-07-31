@@ -128,17 +128,14 @@ verb	forth	INTERPRET
 			goto	2f
 		1:	do	DUP
 			const	8
-			do	plus
-			do	SWAP
+			do	minus
 			do	fetch
 			get	MODE
 			do	AND
 			if	1f
 				do	EXECUTE
 				goto	2f
-		1:	say	"!"
-			do	dot
-			saycr	"!"
+		1:	do	COMPILE
 	2:	get	numin
 		get	numtib
 		do	less
@@ -243,7 +240,7 @@ verb	forth	FIND
 	do	plus
 	do	STRCMP
 	unless	1f
-		const	16
+		const	24
 		do	plus
 		do	SWAP
 		do	fetch
@@ -286,19 +283,17 @@ verb	forth	COMPILE	"COMPILE"	immediate
 
 verb	forth	compnew	"\x3A"				# :
 	do	modeC
+	get	HERE
 	get	LAST
 	do	COMPILE
-	endword
 	do	WORD
-	do	DUP
 	do	fetch
-	do	plus
-	set	HERE
-	do	TRUE
-	do	COMPILE
-	get	HERE
 	const	8
 	do	plus
+	do	ALLOT
+	do	TRUE
+	do	COMPILE
+	const	enter
 	do	COMPILE
 	endword
 
@@ -306,6 +301,7 @@ verb	forth	compend	"\x3B"	immediate		# ;
 	const	EXIT
 	do	COMPILE
 	do	modeI
+	set	LAST
 	endword
 
 #	User Words
