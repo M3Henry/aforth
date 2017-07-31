@@ -266,6 +266,38 @@ verb	forth	modeC	"]"
 	set	MODE	-1
 	endword
 
+verb	forth	COMPILE	"COMPILE"	immediate
+	get	HERE
+	do	store
+	get	HERE
+	const	8
+	set	HERE
+	endword
+
+verb	forth	compnew	"colon"
+	do	modeC
+	get	LAST
+	do	COMPILE
+	do	WORD
+	get	HERE
+	do	DUP
+	do	fetch
+	do	plus
+	set	HERE
+	do	TRUE
+	do	COMPILE
+	get	HERE
+	const	8
+	do	plus
+	do	COMPILE
+	endword
+
+verb	forth	compend	";"	immediate
+	const	EXIT
+	do	COMPILE
+	do	modeI
+	endword
+
 #	User Words
 
 verb	forth	greet	GREET
@@ -440,6 +472,34 @@ verb	forth	muldiv	"*/"
 verb	forth	iszero	"0="
 	do	FALSE
 	do	equal
+	endword
+
+verb	forth	CMOVE
+2:	test	equal	0	1f
+		do	dec
+		do	pushret					# Count
+		do	OVER					#
+		do	fetchb					#
+		do	OVER					#
+		do	storeb					#
+		const	8					#
+		do	plus					#
+		do	SWAP					#
+		const	8					#
+		do	plus					#
+		do	SWAP					#
+		do	popret					#
+		goto	2
+1:	do	DROP
+	do	drop2
+	endword
+
+verb	forth	STRMOVE
+	do	OVER
+	do	fetch
+	const	8
+	do	plus
+	do	CMOVE
 	endword
 
 # "CODEWORDS"
