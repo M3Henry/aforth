@@ -86,7 +86,7 @@
 .endm
 
 .macro	unless label
-	do	NOT
+	do	iszero
 	if	\label
 .endm
 

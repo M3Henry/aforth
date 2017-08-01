@@ -62,7 +62,7 @@ verb	forth	QUIT
 	do	RESETRETURN	# was commented out?
 	do	modeI
 2:	do	TIB
-	const	80
+	const	256	#80
 	escape	93
 	say	"➤ "
 	do	ACCEPT

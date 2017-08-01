@@ -23,15 +23,19 @@ verb	forth	INTERPRET
 			do	fetch
 			do	CONVERT
 			do	drop2
-			test	greater	0	2f
-				do	DROP
+			test	greater	0	5f
 				get	HERE
 				escape	91
 				say	"Unknown token: "
 				do	PRINT
 				do	CR
 				do	ABORT
-			goto	2f
+		5:	get MODE
+			unless	2f
+				const	docon
+				do	COMPILE
+				do	COMPILE
+				goto	2f
 		1:	do	DUP
 			const	8
 			do	minus

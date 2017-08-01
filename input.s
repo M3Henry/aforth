@@ -1,7 +1,7 @@
 #	Input
 
 verb	forth	TIB
-	scratch	80
+	scratch	256	#80
 	endword
 
 verb	forth	numtib	"\#TIB"
