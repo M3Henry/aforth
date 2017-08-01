@@ -4,6 +4,12 @@ verb	forth	HERE
 	variable
 	endword
 
+.macro	hereflg	flags:req
+	get	HERE
+	const	\flags
+	do	SETFLAGS
+.endm
+
 verb	forth	modeI	"["	immediate
 	set	MODE	0
 	endword
@@ -132,13 +138,13 @@ verb	forth	plusloop	"+LOOP"	immediate
 verb	forth	IF	"IF"	immediate
 	compile iszero
 	compile	dobranch
-	get	HERE
+	hereflg	'I'
 	compile	0
 	endword
 
 verb	forth	ELSE	"ELSE"	immediate
 	compile dogoto
-	get	HERE
+	hereflg	'I'
 	compile 0
 	do	SWAP
 	get	HERE
@@ -151,3 +157,20 @@ verb	forth	THEN	"THEN"	immediate
 	do	SWAP
 	do	store
 	endword
+
+#verb	forth	STRIPFLAGS
+#	const	0x0000FFFFFFFFFFFF
+#	do	AND
+#	endword
+
+verb	forth	GETFLAGS
+	const	0x0001000000000000
+	do	divide
+	endword
+
+verb	forth	SETFLAGS
+	const	0x0001000000000000
+	do	mult
+	do	OR
+	endword
+

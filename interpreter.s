@@ -33,8 +33,8 @@ verb	forth	INTERPRET
 		5:	get MODE
 			unless	2f
 				const	docon
-				do	COMPILE
-				do	COMPILE
+				do	comma
+				do	comma
 				goto	2f
 		1:	do	DUP
 			const	8
@@ -45,7 +45,7 @@ verb	forth	INTERPRET
 			if	1f
 				do	EXECUTE
 				goto	2f
-		1:	do	COMPILE
+		1:	do	comma
 	2:	get	numin
 		get	numtib
 		do	less

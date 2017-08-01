@@ -13,6 +13,8 @@ fetchb:		codeword
 
 verb	code	store	">@"
 	minstk	2
+	mov	$0x0000FFFFFFFFFFFF, ACC
+	and	ACC,	TOS
 	mov	(SP),	ACC
 	mov	ACC,	(TOS)
 	jmp	_drop2
