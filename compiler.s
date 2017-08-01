@@ -52,6 +52,8 @@ verb	forth	compend	"\x3B"	immediate		# ;
 	set	LAST
 	endword
 
+#	Indefinite Loops
+
 verb	forth	BEGIN	"BEGIN"	immediate
 	get	HERE
 	endword
@@ -84,3 +86,44 @@ verb	forth	REPEAT	"REPEAT"	immediate
 	do	SWAP
 	do	store
 	endword
+
+#	Finite Loops
+
+verb	forth	DO	"DO"	immediate
+	get	HERE
+	compile	pushret			# Loop Counter
+	compile	pushret			# # Loop End
+	endword				# #
+
+verb	forth	LOOP	"LOOP"	immediate
+	compile	popret			# #
+	compile	popret			#
+	compile	inc
+	compile	dup2
+	compile	nequal
+	compile	dobranch
+		compile
+	compile	drop2
+	endword
+
+verb	forth	plusloop	"+LOOP"	immediate
+	compile	popret			# #
+	compile	SWAP			#
+	compile	popret			#
+	compile	SWAP
+	compile	pushret			# Increment
+	compile	dup2			#
+	compile lequal			#
+	compile	popret			#
+	compile	SWAP
+	compile	pushret			# Less Before?
+	compile	plus			#
+	compile	dup2			#
+	compile	greater			#
+	compile	popret			#
+	compile XOR
+	compile	dobranch
+		compile
+	compile	drop2
+	endword
+
