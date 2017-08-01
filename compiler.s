@@ -127,3 +127,27 @@ verb	forth	plusloop	"+LOOP"	immediate
 	compile	drop2
 	endword
 
+#	Conditionals
+
+verb	forth	IF	"IF"	immediate
+	compile iszero
+	compile	dobranch
+	get	HERE
+	compile	0
+	endword
+
+verb	forth	ELSE	"ELSE"	immediate
+	compile dogoto
+	get	HERE
+	compile 0
+	do	SWAP
+	get	HERE
+	do	SWAP
+	do	store
+	endword
+
+verb	forth	THEN	"THEN"	immediate
+	get	HERE
+	do	SWAP
+	do	store
+	endword
