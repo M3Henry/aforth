@@ -18,7 +18,7 @@ verb	forth	ALLOT
 	set	HERE
 	endword
 
-verb	forth	COMPILE	"COMPILE"	immediate
+verb	forth	comma	","	immediate
 	get	HERE
 	do	store
 	const	8
@@ -29,7 +29,7 @@ verb	forth	COMPILE	"COMPILE"	immediate
 .ifnb \value
 	const	\value
 .endif
-	do	COMPILE
+	do	comma
 .endm
 
 verb	forth	compnew	"\x3A"				# :
