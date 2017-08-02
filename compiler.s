@@ -48,7 +48,6 @@ verb	forth	compnew	"\x3A"				# :
 	const	8
 	do	plus
 	do	ALLOT
-	compile	-1
 	compile	enter
 	endword
 

@@ -45,7 +45,6 @@ enter:
 
 	.quad	0
 7:	strlit	"COLD"
-	.quad	0
 COLD:	forthword
 _cold:	do	RESETDATA
 	set	LAST	dictionaryhead

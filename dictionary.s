@@ -28,7 +28,7 @@ verb	forth	FIND
 	do	plus
 	do	STRCMP
 	unless	1f
-		const	24
+		const	16
 		do	plus
 		do	SWAP
 		do	fetch

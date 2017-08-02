@@ -113,11 +113,6 @@
 .else
 7:	strlit	"\name\()"
 .endif
-.ifb	\immediate
-	.quad	-1
-.else
-	.quad	0
-.endif
 .ifnb	\immediate
 \name\():	\type\()word	\immediate
 .else
