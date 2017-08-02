@@ -4,12 +4,6 @@ verb	forth	HERE
 	variable
 	endword
 
-.macro	hereflg	flags:req
-	get	HERE
-	const	\flags
-	do	SETFLAGS
-.endm
-
 verb	forth	modeI	"["	immediate
 	set	MODE	0
 	endword
@@ -100,16 +94,78 @@ verb	forth	DO	"DO"	immediate
 	compile	pushret			# # Loop End
 	endword				# #
 
+verb	forth	LEAVE "LEAVE" immediate
+	compile popret			# #
+	compile	popret			#
+	compile dogoto
+	get	HERE
+	do	SIFTDO
+	do	store
+	compile	0
+	endword
+
+verb	forth	loopI	"I"	immediate	# ( -- uint )
+	compile	popret			# #
+	compile	popret			#
+	compile	DUP
+	compile	pushret			# Loop Counter
+	compile	SWAP			#
+	compile	pushret			# # Loop End
+	endword
+
 verb	forth	LOOP	"LOOP"	immediate
 	compile	popret			# #
 	compile	popret			#
 	compile	inc
 	compile	dup2
 	compile	nequal
-	compile	dobranch
+0:	compile	dobranch
+	do	DUP
 		compile
-	compile	drop2
+	do	DUP
+	do	fetch
+	test	equal	pushret	1f
+		const	thing
+		do	linksapply
+		const	pushret
+		do	SWAP
+		do	store
+		goto	2f
+1:	do	drop2
+2:	compile	drop2
 	endword
+
+noverb	forth linksapply			# ( ptr func -- )
+	do	OVER
+	if	1f
+		do	drop2
+		endword
+1:	do	OVER
+	do	fetch
+	do	OVER
+	do	linksapply
+	do	EXECUTE
+	endword
+
+noverb	forth thing
+	get	HERE
+	do	SWAP
+	do	store
+	endword
+
+noverb	forth resolveleaves
+	do	DUP
+	do	fetch
+	do	DUP
+	if	1f
+		do	DROP
+		endword
+1:	do	resolveleaves
+	get	HERE
+	do	SWAP
+	do	store
+	endword
+
 
 verb	forth	plusloop	"+LOOP"	immediate
 	compile	popret			# #
@@ -127,9 +183,20 @@ verb	forth	plusloop	"+LOOP"	immediate
 	compile	greater			#
 	compile	popret			#
 	compile XOR
-	compile	dobranch
-		compile
-	compile	drop2
+	goto	0b	# Can use LOOP logic
+
+verb	forth	SIFTDO				# ( {sys} -- {sys} sys )
+	do	DUP
+	do	fetch
+	const	pushret
+	do	equal
+	if	1f
+		do	pushret		# Unrelated stack item
+		do	SIFTDO		#
+		do	popret		#
+		do	SWAP
+		endword
+1:	do	DUP
 	endword
 
 #	Conditionals
@@ -137,13 +204,11 @@ verb	forth	plusloop	"+LOOP"	immediate
 verb	forth	IF	"IF"	immediate
 	compile iszero
 	compile	dobranch
-	hereflg	'I'
 	compile	0
 	endword
 
 verb	forth	ELSE	"ELSE"	immediate
 	compile dogoto
-	hereflg	'I'
 	compile 0
 	do	SWAP
 	get	HERE
@@ -173,3 +238,19 @@ verb	forth	SETFLAGS
 	do	OR
 	endword
 
+verb	forth	SIFTFLAGS
+	do	OVER
+	do	GETFLAGS
+	do	OVER
+	do	equal
+	if	1f
+		do	SWAP
+		do	pushret			# Unrelated stack item
+		do	SIFTFLAGS		#
+		do	popret			#
+		do	SWAP
+		endword
+1:	do	DROP
+	do	DUP
+	do	STRIPFLAGS
+	endword

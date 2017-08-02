@@ -120,6 +120,14 @@
 .endif
 .endm
 
+.macro	noverb type:req name:req immediate
+.ifnb	\immediate
+\name\():	\type\()word	\immediate
+.else
+\name\():	\type\()word
+.endif
+.endm
+
 #	Codeword macros
 
 .macro	codeword immediate
