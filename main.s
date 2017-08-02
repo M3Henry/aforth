@@ -48,7 +48,7 @@ enter:
 COLD:	forthword
 _cold:	do	RESETDATA
 	set	LAST	dictionaryhead
-	set	HERE	dictionaryend
+	set	here	dictionaryend
 	escape	0
 	escape	96
 	saycr	"aFORTH alpha"

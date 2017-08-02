@@ -24,7 +24,7 @@ verb	forth	INTERPRET
 			do	CONVERT
 			do	drop2
 			test	greater	0	5f
-				get	HERE
+				do	HERE
 				escape	91
 				say	"Unknown token: "
 				do	PRINT

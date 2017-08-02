@@ -21,6 +21,17 @@ verb	code	store	">@"
 	mov	ACC,	(TOS)
 	jmp	_drop2
 
+.macro	storei value:req variable
+.ifnb	\variable
+	const	value
+	const	variable
+.else
+	const	value
+	do	SWAP
+.endif
+	do	store
+.endm
+
 storeb:		codeword
 	minstk	2
 	mov	(SP),	ACC

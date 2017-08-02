@@ -1,7 +1,11 @@
 #	Compiler
 
-verb	forth	HERE
+noverb	forth	here
 	variable
+	endword
+
+verb	forth	HERE
+	get	here
 	endword
 
 verb	forth	modeI	"["	immediate
@@ -13,13 +17,13 @@ verb	forth	modeC	"]"
 	endword
 
 verb	forth	ALLOT
-	get	HERE
+	do	HERE
 	do	plus
-	set	HERE
+	set	here
 	endword
 
 verb	forth	comma	","	immediate
-	get	HERE
+	do	HERE
 	do	store
 	const	8
 	do	ALLOT
@@ -32,11 +36,40 @@ verb	forth	comma	","	immediate
 	do	comma
 .endm
 
-verb	forth	compnew	"\x3A"				# :
-	do	modeC
-	get	HERE
-	get	LAST
+#	Compiler Compiling
+
+verb	forth	backwardmark	"MARK<"	immediate		# ( -- addr )
+	do	HERE
+	endword
+
+verb	forth	backwardresolve	"<RESOLVE"	immediate	# ( addr -- )
 	compile
+	endword
+
+verb	forth	forwardmark	"MARK>"	immdiate		# ( -- addr )
+	do	HERE
+	do	FALSE
+	compile
+	endword
+
+verb	forth	forwardresolve	">RESOLVE"	immediate	# ( addr -- )
+	do	HERE
+	do	SWAP
+	do	store
+	endword
+
+verb	forth	markstore ">@MARK"	immediate	# ( quad -- addr )
+	do	HERE
+	do	SWAP
+	compile
+	endword
+
+#
+
+verb	forth	compnew	"\x3A"	#":"
+	do	modeC
+	get	LAST
+	do	markstore
 	do	WORD
 	do	fetch
 	const	8
@@ -45,65 +78,65 @@ verb	forth	compnew	"\x3A"				# :
 	compile	enter
 	endword
 
-verb	forth	compend	"\x3B"	immediate		# ;
+verb	forth	compend	"\x3B"	immediate	#";"
 	compile	EXIT
 	do	modeI
 	set	LAST
 	endword
 
+verb	forth	IMMEDIATE
+	get	LAST
+	do	DUP
+	const	0x8000000000000000
+	do	OR
+	do	store
+	endword
+
 #	Indefinite Loops
 
 verb	forth	BEGIN	"BEGIN"	immediate
-	get	HERE
+	do	backwardmark
 	endword
 
 verb	forth	AGAIN	"AGAIN"	immediate
 	compile	dogoto
-	compile
+	do	backwardresolve
 	endword
 
 verb	forth	UNTIL	"UNTIL"	immediate
 	compile	iszero
 	compile	dobranch
-	compile
+	do	backwardresolve
 	endword
 
 verb	forth	WHILE	"WHILE"	immediate
 	compile	iszero
 	compile	dobranch
-	get	HERE
-	do	SWAP
-	compile
+	do	forwardmark
 	endword
 
 verb	forth	REPEAT	"REPEAT"	immediate
 	compile	dogoto
-	do	DUP
-	do	fetch
-	compile
-	get	HERE
 	do	SWAP
-	do	store
+	do	backwardresolve
+	do	forwardresolve
 	endword
 
 #	Finite Loops
 
 verb	forth	DO	"DO"	immediate	# ( -- sys )
 	const	pushret
-	get	HERE
-	compile	DO	# (pushret)	# Loop Counter
+	const	DO
+	do	markstore		# Loop Counter	# (pushret)
 	compile	pushret			# # Loop End
 	endword				# #
 
 verb	forth	LEAVE	"LEAVE" immediate	# ( {sys} -- {sys sys} )
 	compile popret			# #
 	compile	popret			#
-	compile	drop2
+#	compile	drop2
 	compile dogoto
-	say	"#"
 	do	SIFTDO
-	say	"#"
-	compile	LEAVE	# (gotoaddr)
 	endword
 
 verb	forth	loopI	"I>"	immediate	# ( -- uint )
@@ -126,19 +159,20 @@ verb	forth	LOOP	"LOOP"	immediate	# ( sys [sys...sys] -- )
 	do	fetch
 	const	DO
 	do	equal
-	if	1f
-		get	HERE
+	if	1f				# Do an 8+ forwardresolve
+		do	HERE
 		const	8
 		do	plus
 		do	SWAP
 		do	store
 		goto	2b
 1:	do	DUP
-		compile
+	do	backwardresolve
 	do	store
+	compile	drop2
 	endword
 
-noverb	forth linksapply			# ( ptr func -- )
+noverb	forth	linksapply			# ( ptr func -- )
 	do	OVER
 	if	1f
 		do	drop2
@@ -168,8 +202,7 @@ verb	forth	plusloop	"+LOOP"	immediate
 	compile XOR
 	goto	0b	# Can use LOOP logic
 
-verb	forth	SIFTDO				# ( {sys} -- {sys sys} )
-	say	"@"
+noverb	forth	SIFTDO				# ( {sys} -- {sys sys} )
 	do	DUP
 	do	fetch
 	do	DUP
@@ -184,7 +217,8 @@ verb	forth	SIFTDO				# ( {sys} -- {sys sys} )
 		do	SIFTDO		#
 		do	popret		#
 		endword
-1:	get	HERE
+1:	const	LEAVE
+	do	markstore
 	endword
 
 #	Conditionals
@@ -192,25 +226,21 @@ verb	forth	SIFTDO				# ( {sys} -- {sys sys} )
 verb	forth	IF	"IF"	immediate
 	compile iszero
 	compile	dobranch
-	get	HERE
-	compile	IF	# (gotoaddr)
+	do	forwardmark
 	endword
 
 verb	forth	ELSE	"ELSE"	immediate
 	compile dogoto
-	get	HERE
-	compile IF	# (gotoaddr)
+	do	forwardmark
 	do	SWAP
-	get	HERE
-	do	SWAP
-	do	store
+	do	forwardresolve
 	endword
 
 verb	forth	THEN	"THEN"	immediate
-	get	HERE
-	do	SWAP
-	do	store
+	do	forwardresolve
 	endword
+
+#	Flags
 
 verb	forth	STRIPFLAGS
 	const	0x0000FFFFFFFFFFFF

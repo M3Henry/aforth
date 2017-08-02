@@ -23,7 +23,7 @@ verb	code	ACCEPT
 	jmp	_drop
 
 verb	forth	WORD
-	get	HERE
+	do	HERE
 	const	0
 	do	OVER
 	do	store
@@ -43,7 +43,7 @@ verb	forth	WORD
 		const	' '
 		do	lequal
 		if	2f
-			get	HERE
+			do	HERE
 			do	incaddr
 			do	OVER
 			do	storeb
@@ -51,5 +51,5 @@ verb	forth	WORD
 			goto	1b
 	2:	do	DROP
 3:	do	DROP
-	get	HERE
+	do	HERE
 	endword
