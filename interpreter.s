@@ -37,9 +37,10 @@ verb	forth	INTERPRET
 				do	comma
 				goto	2f
 		1:	do	DUP
-			const	8
-			do	minus
 			do	fetch
+			const	0x8000000000000000
+			do	AND
+			do	iszero
 			get	MODE
 			do	AND
 			if	1f
