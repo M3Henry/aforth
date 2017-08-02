@@ -158,10 +158,10 @@ verb	forth	THEN	"THEN"	immediate
 	do	store
 	endword
 
-#verb	forth	STRIPFLAGS
-#	const	0x0000FFFFFFFFFFFF
-#	do	AND
-#	endword
+verb	forth	STRIPFLAGS
+	const	0x0000FFFFFFFFFFFF
+	do	AND
+	endword
 
 verb	forth	GETFLAGS
 	const	0x0001000000000000

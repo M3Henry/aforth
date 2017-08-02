@@ -2,6 +2,8 @@
 
 verb	code	fetch	"@>"
 	minstk	1
+	mov	$0x0000FFFFFFFFFFFF, ACC
+	and	ACC,	TOS
 	mov	(TOS),	TOS
 	jmp	next
 

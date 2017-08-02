@@ -29,7 +29,9 @@ _start:	movq	%rsp,	rspbk
 next:
 	mov	(IP),	WP
 	advance	IP
-	jmp	*(WP)
+	mov	$0x0000FFFFFFFFFFFF,	ACC
+	and	(WP),	ACC	# Strip flags off the codefield
+	jmp	*ACC
 
 enter:
 	push	IP
@@ -151,7 +153,9 @@ verb	code	EXECUTE
 	mov	TOS,	WP
 	mov	(SP),	TOS
 	advance	SP
-	jmp	*(WP)
+	mov	$0x0000FFFFFFFFFFFF,	ACC
+	and	(WP),	ACC	# Strip flags off the codefield
+	jmp	*ACC
 dictionaryend:
 
 # "STACK"

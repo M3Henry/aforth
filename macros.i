@@ -2,8 +2,12 @@
 	.quad	\label
 .endm
 
-.macro	forthword
+.macro	forthword immediate
+.ifnb	\immediate
+	.quad	0x8000000000000000 + enter
+.else
 	.quad	enter
+.endif
 .endm
 
 .macro	endword
@@ -114,14 +118,21 @@
 .else
 	.quad	0
 .endif
-
+.ifnb	\immediate
+\name\():	\type\()word	\immediate
+.else
 \name\():	\type\()word
+.endif
 .endm
 
 #	Codeword macros
 
-.macro	codeword
+.macro	codeword immediate
+.ifnb	\immediate
+	.quad	0x8000000000000008 + .
+.else
 	.quad	. + 8
+.endif
 .endm
 
 .macro	advance	register

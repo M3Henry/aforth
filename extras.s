@@ -1,6 +1,6 @@
 #	User Words
 
-verb	forth	greet	GREET
+verb	forth	GREET
 	say	"Hello, World!"
 	do	CR
 	endword
