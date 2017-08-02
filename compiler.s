@@ -88,13 +88,14 @@ verb	forth	REPEAT	"REPEAT"	immediate
 
 #	Finite Loops
 
-verb	forth	DO	"DO"	immediate
+verb	forth	DO	"DO"	immediate	# ( -- sys )
+	const	pushret
 	get	HERE
-	compile	pushret			# Loop Counter
+	compile	DO	# (pushret)	# Loop Counter
 	compile	pushret			# # Loop End
 	endword				# #
 
-verb	forth	LEAVE "LEAVE" immediate
+verb	forth	LEAVE "LEAVE" immediate		# ( {sys} -- {sys} )
 	compile popret			# #
 	compile	popret			#
 	compile dogoto
@@ -124,15 +125,13 @@ verb	forth	LOOP	"LOOP"	immediate
 		compile
 	do	DUP
 	do	fetch
-	test	equal	pushret	1f
+	test	equal	DO	1f
 		const	thing
 		do	linksapply
-		const	pushret
-		do	SWAP
-		do	store
 		goto	2f
-1:	do	drop2
-2:	compile	drop2
+1:	do	DROP
+2:	do	store
+	compile	drop2
 	endword
 
 noverb	forth linksapply			# ( ptr func -- )
@@ -188,7 +187,7 @@ verb	forth	plusloop	"+LOOP"	immediate
 verb	forth	SIFTDO				# ( {sys} -- {sys} sys )
 	do	DUP
 	do	fetch
-	const	pushret
+	const	DO
 	do	equal
 	if	1f
 		do	pushret		# Unrelated stack item
@@ -204,11 +203,13 @@ verb	forth	SIFTDO				# ( {sys} -- {sys} sys )
 verb	forth	IF	"IF"	immediate
 	compile iszero
 	compile	dobranch
+	get	HERE
 	compile	0
 	endword
 
 verb	forth	ELSE	"ELSE"	immediate
 	compile dogoto
+	get	HERE
 	compile 0
 	do	SWAP
 	get	HERE
