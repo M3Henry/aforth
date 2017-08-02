@@ -95,17 +95,18 @@ verb	forth	DO	"DO"	immediate	# ( -- sys )
 	compile	pushret			# # Loop End
 	endword				# #
 
-verb	forth	LEAVE "LEAVE" immediate		# ( {sys} -- {sys} )
+verb	forth	LEAVE	"LEAVE" immediate	# ( {sys} -- {sys sys} )
 	compile popret			# #
 	compile	popret			#
+	compile	drop2
 	compile dogoto
-	get	HERE
+	say	"#"
 	do	SIFTDO
-	do	store
-	compile	0
+	say	"#"
+	compile	LEAVE	# (gotoaddr)
 	endword
 
-verb	forth	loopI	"I"	immediate	# ( -- uint )
+verb	forth	loopI	"I>"	immediate	# ( -- uint )
 	compile	popret			# #
 	compile	popret			#
 	compile	DUP
@@ -114,24 +115,27 @@ verb	forth	loopI	"I"	immediate	# ( -- uint )
 	compile	pushret			# # Loop End
 	endword
 
-verb	forth	LOOP	"LOOP"	immediate
+verb	forth	LOOP	"LOOP"	immediate	# ( sys [sys...sys] -- )
 	compile	popret			# #
 	compile	popret			#
 	compile	inc
 	compile	dup2
 	compile	nequal
 0:	compile	dobranch
-	do	DUP
-		compile
-	do	DUP
+2:	do	DUP
 	do	fetch
-	test	equal	DO	1f
-		const	thing
-		do	linksapply
-		goto	2f
-1:	do	DROP
-2:	do	store
-	compile	drop2
+	const	DO
+	do	equal
+	if	1f
+		get	HERE
+		const	8
+		do	plus
+		do	SWAP
+		do	store
+		goto	2b
+1:	do	DUP
+		compile
+	do	store
 	endword
 
 noverb	forth linksapply			# ( ptr func -- )
@@ -145,26 +149,6 @@ noverb	forth linksapply			# ( ptr func -- )
 	do	linksapply
 	do	EXECUTE
 	endword
-
-noverb	forth thing
-	get	HERE
-	do	SWAP
-	do	store
-	endword
-
-noverb	forth resolveleaves
-	do	DUP
-	do	fetch
-	do	DUP
-	if	1f
-		do	DROP
-		endword
-1:	do	resolveleaves
-	get	HERE
-	do	SWAP
-	do	store
-	endword
-
 
 verb	forth	plusloop	"+LOOP"	immediate
 	compile	popret			# #
@@ -184,18 +168,23 @@ verb	forth	plusloop	"+LOOP"	immediate
 	compile XOR
 	goto	0b	# Can use LOOP logic
 
-verb	forth	SIFTDO				# ( {sys} -- {sys} sys )
+verb	forth	SIFTDO				# ( {sys} -- {sys sys} )
+	say	"@"
 	do	DUP
 	do	fetch
+	do	DUP
 	const	DO
 	do	equal
+	do	SWAP
+	const	LEAVE
+	do	equal
+	do	OR
 	if	1f
 		do	pushret		# Unrelated stack item
 		do	SIFTDO		#
 		do	popret		#
-		do	SWAP
 		endword
-1:	do	DUP
+1:	get	HERE
 	endword
 
 #	Conditionals
@@ -204,13 +193,13 @@ verb	forth	IF	"IF"	immediate
 	compile iszero
 	compile	dobranch
 	get	HERE
-	compile	0
+	compile	IF	# (gotoaddr)
 	endword
 
 verb	forth	ELSE	"ELSE"	immediate
 	compile dogoto
 	get	HERE
-	compile 0
+	compile IF	# (gotoaddr)
 	do	SWAP
 	get	HERE
 	do	SWAP
@@ -237,21 +226,4 @@ verb	forth	SETFLAGS
 	const	0x0001000000000000
 	do	mult
 	do	OR
-	endword
-
-verb	forth	SIFTFLAGS
-	do	OVER
-	do	GETFLAGS
-	do	OVER
-	do	equal
-	if	1f
-		do	SWAP
-		do	pushret			# Unrelated stack item
-		do	SIFTFLAGS		#
-		do	popret			#
-		do	SWAP
-		endword
-1:	do	DROP
-	do	DUP
-	do	STRIPFLAGS
 	endword
