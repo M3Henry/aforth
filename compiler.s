@@ -239,21 +239,3 @@ verb	forth	ELSE	"ELSE"	immediate
 verb	forth	THEN	"THEN"	immediate
 	do	forwardresolve
 	endword
-
-#	Flags
-
-verb	forth	STRIPFLAGS
-	const	0x0000FFFFFFFFFFFF
-	do	AND
-	endword
-
-verb	forth	GETFLAGS
-	const	0x0001000000000000
-	do	divide
-	endword
-
-verb	forth	SETFLAGS
-	const	0x0001000000000000
-	do	mult
-	do	OR
-	endword
