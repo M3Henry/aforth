@@ -23,6 +23,7 @@ verb	code	ACCEPT
 	jmp	_drop
 
 verb	forth	WORD
+	do	pushret
 	do	HERE
 	const	0
 	do	OVER
@@ -41,7 +42,11 @@ verb	forth	WORD
 		do	incaddr
 		do	DUP
 		const	' '
-		do	lequal
+		do	less
+		do	OVER
+		do	peekret
+		do	equal
+		do	OR
 		if	2f
 			do	HERE
 			do	incaddr
@@ -50,6 +55,7 @@ verb	forth	WORD
 			do	inc
 			goto	1b
 	2:	do	DROP
-3:	do	DROP
+3:	do	popret
+	do	drop2
 	do	HERE
 	endword

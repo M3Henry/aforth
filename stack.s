@@ -74,3 +74,8 @@ verb	code	popret	"R>"
 	_dup
 	pop	TOS
 	jmp	next
+
+verb	code	peekret	"R@"
+	_dup
+	mov	(%rsp),	TOS
+	jmp	next

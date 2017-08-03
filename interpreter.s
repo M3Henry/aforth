@@ -6,7 +6,8 @@ verb	forth	MODE
 
 verb	forth	INTERPRET
 	set	numin	0
-	3:	do	WORD
+	3:	const	' '
+		do	WORD
 		do	DUP
 		do	fetch
 		if	0f

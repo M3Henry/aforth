@@ -70,6 +70,7 @@ verb	forth	compnew	"\x3A"	#":"
 	do	modeC
 	get	LAST
 	do	markstore
+	const	' '
 	do	WORD
 	do	fetch
 	const	8
@@ -238,4 +239,17 @@ verb	forth	ELSE	"ELSE"	immediate
 
 verb	forth	THEN	"THEN"	immediate
 	do	forwardresolve
+	endword
+
+#	Strings
+
+verb	forth	echo	".\""	immediate
+	compile	dostr
+	const	'"'
+	do	WORD
+	do	fetch
+	const	8
+	do	plus
+	do	ALLOT
+	compile	PRINT
 	endword
