@@ -49,6 +49,25 @@ verb	code	OVER
 	pop	TOS
 	jmp	next
 
+verb	code	ROT
+	minstk	3
+	mov	(SP),	ACC
+	mov	TOS,	(SP)
+	mov	-8(SP),	TOS
+	mov	ACC,	-8(SP)
+	jmp	next
+
+verb	code	ROLL
+	minstk	1
+	cmp	TOS,	0
+	je	1f
+	shl	TOS
+	shl	TOS
+	shl	TOS
+	add	SP,	TOS
+	mov	(TOS),	TOS
+1:	jmp	next
+
 verb	code	DEPTH
 	mov	$stack,	ACC
 	sub	SP,	ACC
