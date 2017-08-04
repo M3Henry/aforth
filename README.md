@@ -24,3 +24,5 @@ Try entering some of the following:
 
 FORGET TRIANGLE
 5 TRIANGLE
+
+![alt text](https://github.com/M3Henry/aforth/blob/master/example.png)
