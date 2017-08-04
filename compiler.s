@@ -76,6 +76,8 @@ verb	forth	compnew	"\x3A"	#":"
 	const	8
 	do	plus
 	do	ALLOT
+	do	HERE
+	set	recurse
 	compile	enter
 	endword
 
@@ -91,6 +93,15 @@ verb	forth	IMMEDIATE
 	const	0x8000000000000000
 	do	OR
 	do	store
+	endword
+
+noverb	forth	recurse
+	variable
+	endword
+
+verb	forth	RECURSE	"RECURSE"	immediate	# ( {sys} -- {sys} )
+	get	recurse
+	compile
 	endword
 
 verb	forth	brackettick	"[\x27]"	immediate	#"'"
