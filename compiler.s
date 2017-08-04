@@ -64,7 +64,7 @@ verb	forth	markstore ">@MARK"	immediate	# ( quad -- addr )
 	compile
 	endword
 
-#
+#	Word Compiling
 
 verb	forth	compnew	"\x3A"	#":"
 	do	modeC
@@ -91,6 +91,38 @@ verb	forth	IMMEDIATE
 	const	0x8000000000000000
 	do	OR
 	do	store
+	endword
+
+verb	forth	brackettick	"[\x27]"	immediate	#"'"
+	const	' '
+	do	WORD
+	do	FIND
+	if	1f
+		do	ABORT
+1:	compile	docon
+	compile
+	endword
+
+verb	forth	FORGET
+	const	' '
+	do	WORD
+	get	LAST
+2:	do	dup2
+	const	8
+	do	plus
+	do	STRCMP
+	unless	1f
+		do	DUP
+		set	here
+		do	fetch
+		set	LAST
+		do	DROP
+		endword
+1:	do	fetch
+	do	DUP
+	if	2b
+	do	ABORT
+
 	endword
 
 #	Indefinite Loops
@@ -252,4 +284,21 @@ verb	forth	echo	".\""	immediate
 	do	plus
 	do	ALLOT
 	compile	PRINT
+	endword
+
+#	Compile Literals
+
+verb	forth	CONSTANT
+	do	compnew
+	do	SWAP
+	compile	docon
+		compile
+	do	compend
+	endword
+
+verb	forth	VARIABLE
+	do	compnew
+	compile	dovar
+	compile	0
+	do	compend
 	endword
