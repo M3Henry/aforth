@@ -15,3 +15,4 @@ obj/main.o: main.s dictionary.s interpreter.s memory.s boolean.s extras.s macros
 
 clean:
 	@rm obj/*
+	@rm bin/*
