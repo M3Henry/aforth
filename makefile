@@ -1,8 +1,12 @@
+.PHONY: all run test clean
+
 all: bin/aFORTH
+
+test: all
 	@echo Testing...
 	@bin/aFORTH < test.txt
 
-interactive: bin/aFORTH
+run: all
 	@bin/aFORTH
 
 bin/aFORTH: obj/main.o
