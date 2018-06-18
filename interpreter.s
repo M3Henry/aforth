@@ -55,7 +55,7 @@ verb	forth	INTERPRET
 	escape	92
 	do	DEPTH
 	test	equal	0	4f
-	say	" ⏎ "
+	say	" ok "
 	test	equal	1	5f
 	do	DUP
 	do	dot
@@ -66,7 +66,7 @@ verb	forth	INTERPRET
 	saycr	"]"
 	endword
 4:	do	DROP
-	saycr	" 🗸"
+	saycr	" ok."
 	endword
 
 verb	forth	CONVERT

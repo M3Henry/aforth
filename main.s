@@ -65,7 +65,7 @@ verb	forth	QUIT
 2:	do	TIB
 	const	256	#80
 	escape	93
-	say	"➤ "
+	say	"> "
 	do	ACCEPT
 	escape	0
 	test	equal	0	1f
