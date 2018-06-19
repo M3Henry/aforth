@@ -33,9 +33,7 @@ verb	forth	INTERPRET
 				do	ABORT
 		5:	get MODE
 			unless	2f
-				const	docon
-				do	comma
-				do	comma
+				do	LITERAL
 				goto	2f
 		1:	do	DUP
 			do	fetch

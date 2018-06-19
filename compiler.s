@@ -299,11 +299,15 @@ verb	forth	echo	".\""	immediate
 
 #	Compile Literals
 
+verb	forth	LITERAL	"LITERAL"	immediate
+	compile docon
+		compile
+	endword
+
 verb	forth	CONSTANT
 	do	compnew
 	do	SWAP
-	compile	docon
-		compile
+	do	LITERAL
 	do	compend
 	endword
 
